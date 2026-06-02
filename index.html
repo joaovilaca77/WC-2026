@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Bolão Copa 2026</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* ==========================================
+           IDENTIDADE VISUAL E GERAL
+           ========================================== */
+        body { background-color: #f8f9fa; font-family: 'Montserrat', sans-serif; color: #111; }
+
+        .header-bg { 
+            background-color: #198754; 
+            background-image: linear-gradient(135deg, #000000 20%, #4A00E0 50%, #FF007F 80%, #00E5FF 100%);
+            border-bottom: 5px solid #00E5FF;
+        }
+
+        /* ==========================================
+           ECRÃ DE LOGIN
+           ========================================== */
+        .login-wrapper {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: #000; background-image: linear-gradient(135deg, #000000 20%, #4A00E0 50%, #FF007F 80%, #00E5FF 100%);
+        }
+        .login-box {
+            background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            width: 100%; max-width: 400px; text-align: center;
+        }
+        .login-input { border: 2px solid #ddd; border-radius: 8px; font-weight: 600; padding: 12px; }
+        .login-input:focus { border-color: #4A00E0; box-shadow: none; }
+        .btn-login { background: linear-gradient(90deg, #FF007F, #4A00E0); border: none; color: white; padding: 12px; border-radius: 8px; transition: transform 0.2s; font-weight: bold;}
+        .btn-login:hover { transform: scale(1.02); color: white; }
+        
+        /* ==========================================
+           DASHBOARD E MENU
+           ========================================== */
+        .dash-card { background: #fff; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 2px solid transparent; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+        .dash-card:hover { transform: translateY(-10px); border-color: #00E5FF; box-shadow: 0 15px 35px rgba(0,229,255,0.2); }
+        .dash-icon { font-size: 3.5rem; margin-bottom: 15px; }
+        .dash-title { font-weight: 800; color: #111; margin-bottom: 10px; }
+        .dash-desc { color: #666; font-size: 0.9rem; margin-bottom: 0; }
+        
+        /* Ranking Table */
+        .ranking-row { transition: all 0.2s; border-bottom: 1px solid #eee; }
+        .ranking-row:hover { background-color: #f8f9fa; transform: scale(1.01); }
+        .medal { font-size: 1.5rem; }
+        
+        /* ==========================================
+           FASE DE GRUPOS E TABELAS
+           ========================================== */
+        .card-grupo { border-radius: 12px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .group-title { background-color: #000; color: #fff; font-weight: 800; padding: 12px; font-style: italic;}
+        .badge-rodada { background-color: #4A00E0 !important; color: white; }
+        .placar-input { width: 55px; text-align: center; font-weight: 900; font-size: 1.1rem; border-radius: 6px; border: 2px solid #ddd; color:#4A00E0;}
+        .placar-input:focus { border-color: #00E5FF; box-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
+        .jogo-row { background-color: #fff; border-radius: 8px; border: 1px solid #eee; margin-bottom: 5px; transition: transform 0.2s;}
+        .jogo-row:hover { transform: scale(1.02); border-color: #4A00E0; z-index: 10; position: relative; }
+        
+        .table-classificacao th { font-size: 0.70rem; text-transform: uppercase; color: #888; }
+        .table-classificacao td { font-size: 0.85rem; vertical-align: middle; font-weight: 600; }
+        .zona-classificacao { border-left: 4px solid #00E5FF; background-color: rgba(0, 229, 255, 0.05); }
+        .zona-terceiro-classificado { border-left: 4px solid #FF007F; background-color: rgba(255, 0, 127, 0.05); }
+        .zona-terceiro-eliminado { border-left: 4px solid #dee2e6; }
+        
+        .nav-master .nav-link { color: #555; font-weight: 800; border-radius: 50px; margin: 0 5px; padding: 10px 25px; transition: all 0.3s;}
+        .nav-master .nav-link.active { background-color: #000; color: #00E5FF; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); }
+        .flag-table { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; border: 1px solid #ccc; margin-right: 5px; vertical-align: middle; }
+
+        /* ==========================================
+           BRACKET (ÁRVORE MATA-MATA)
+           ========================================== */
+        .bracket-wrapper { display: flex; justify-content: center; align-items: stretch; width: 100%; overflow-x: auto; padding: 20px 0; min-width: 1100px; }
+        .bracket-half { display: flex; flex: 1; }
+        .bracket-left-side { flex-direction: row; }
+        .bracket-right-side { flex-direction: row; }
+
+        .bracket-branch { display: flex; flex: 1; min-height: 50px; }
+        .bracket-left-side .bracket-branch { flex-direction: row; }
+        .bracket-right-side .bracket-branch { flex-direction: row; }
+
+        .bracket-children { display: flex; flex-direction: column; justify-content: center; flex: 1; position: relative; }
+        .bracket-winner { display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; }
+
+        .bracket-left-side .bracket-children::after { content: ''; position: absolute; right: 0; top: 25%; height: 50%; border-right: 2px dotted #b0b0b0; border-top: 2px dotted #b0b0b0; border-bottom: 2px dotted #b0b0b0; width: 20px; border-radius: 0 4px 4px 0; z-index: -1; }
+        .bracket-left-side .bracket-winner { padding-left: 20px; }
+        .bracket-left-side .bracket-winner::before { content: ''; position: absolute; left: 0; top: 50%; width: 20px; border-top: 2px dotted #b0b0b0; z-index: -1; }
+
+        .bracket-right-side .bracket-children::after { content: ''; position: absolute; left: 0; top: 25%; height: 50%; border-left: 2px dotted #b0b0b0; border-top: 2px dotted #b0b0b0; border-bottom: 2px dotted #b0b0b0; width: 20px; border-radius: 4px 0 0 4px; z-index: -1; }
+        .bracket-right-side .bracket-winner { padding-right: 20px; }
+        .bracket-right-side .bracket-winner::before { content: ''; position: absolute; right: 0; top: 50%; width: 20px; border-top: 2px dotted #b0b0b0; z-index: -1; }
+        .hide-line::before { display: none !important; }
+
+        .node-outer { display: flex; align-items: center; justify-content: center; flex: 1; padding: 5px; cursor: pointer; gap: 8px; transition: transform 0.2s; }
+        .node-outer:hover { transform: scale(1.05); }
+        .bracket-left-side .node-outer { flex-direction: row; }
+        .bracket-right-side .node-outer { flex-direction: row; }
+
+        .node-circle { width: 44px; height: 44px; border-radius: 50%; background-color: #f4f4f4; border: 3px solid #dee2e6; display: flex; justify-content: center; align-items: center; margin: 4px; cursor: pointer; transition: all 0.2s; overflow: hidden; padding: 2px; }
+        .node-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .node-circle.filled { border-color: #198754; background-color: #fff; box-shadow: 0 4px 8px rgba(25,135,84,0.3); }
+        .node-circle:hover { transform: scale(1.1); border-color: #198754; }
+        .node-circle.empty-circle { background-color: #f1f3f5; border: 2px solid #ced4da; }
+        
+        .node-abrv { font-weight: 700; color: #444; font-size: 0.85rem; letter-spacing: 0.5px; width: 35px; text-align: center; }
+
+        .center-final { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 30px; min-width: 260px; }
+        .trophy-container { width: 130px; height: 130px; border-radius: 50%; background-color: #f8f9fa; border: 4px solid #dee2e6; display: flex; justify-content: center; align-items: center; z-index: 10; box-shadow: inset 0 4px 8px rgba(0,0,0,0.05); transition: all 0.5s ease; padding: 5px; overflow: hidden; }
+        .trophy-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .trophy-container.winner { background-color: #fff; border-color: #ffc107; box-shadow: 0 0 30px rgba(255,193,7,0.6); transform: scale(1.1); }
+        .trophy-icon-placeholder { font-size: 4rem; opacity: 0.2; }
+
+        .pdf-hide { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="tela-login" class="login-wrapper">
+        <div class="login-box">
+            <h2 class="fw-bold mb-1">⚽ BOLÃO <span style="color: #4A00E0;">2026</span></h2>
+            <p class="text-muted small mb-4">Inicie sessão para simular e guardar os seus palpites</p>
+            
+            <form id="form-login">
+                <div class="mb-3 text-start d-none" id="container-nome">
+                    <label class="form-label fw-bold small">Nome / Apelido</label>
+                    <input type="text" id="login-nome" class="form-control login-input" placeholder="Como quer ser chamado?">
+                </div>
+                <div class="mb-3 text-start">
+                    <label class="form-label fw-bold small">E-mail</label>
+                    <input type="email" id="login-email" class="form-control login-input" required placeholder="seu@email.com">
+                </div>
+                <div class="mb-4 text-start">
+                    <label class="form-label fw-bold small">Palavra-passe</label>
+                    <input type="password" id="login-senha" class="form-control login-input" required placeholder="******">
+                </div>
+                <button type="button" class="btn btn-login w-100" id="btn-submit" onclick="processarAuth(event)">ENTRAR NO BOLÃO</button>
+            </form>
+            
+            <div class="mt-4 border-top pt-3">
+                <p class="text-muted small mb-0" id="texto-alternar">Não tem uma conta? 
+                    <a href="#" class="fw-bold" style="color: #FF007F; text-decoration: none;" onclick="alternarModoAuth(event)">Criar Registo</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DASHBOARD -->
+    <div id="tela-dashboard" style="display: none; min-height: 100vh; background-color: #f4f7f6; padding: 40px 0;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h2 class="fw-bold mb-0">⚽ Menu Principal</h2>
+                <div>
+                    <span class="text-muted me-3">Olá, <strong id="dash-usuario-nome" style="color: #4A00E0;">Visitante</strong>!</span>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onclick="fazerLogout()">Sair</button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="dash-card" onclick="abrirTela('conteudo-bolao')">
+                        <div class="dash-icon">📝</div>
+                        <h4 class="dash-title">Meus Palpites</h4>
+                        <p class="dash-desc">Preencha os resultados, simule o mata-mata e escolha o seu campeão.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="dash-card" onclick="abrirRanking()">
+                        <div class="dash-icon">🏆</div>
+                        <h4 class="dash-title">Ranking Geral</h4>
+                        <p class="dash-desc">Veja a classificação e as escolhas de todos os participantes.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="dash-card" onclick="abrirAcompanhamento()">
+                        <div class="dash-icon">🌍</div>
+                        <h4 class="dash-title">Acompanhamento</h4>
+                        <p class="dash-desc">Confira os resultados reais da Copa (Disponível em 2026).</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA RANKING -->
+    <div id="tela-ranking" style="display: none; min-height: 100vh; background-color: #f4f7f6; padding: 40px 0;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">🏆 Ranking Geral</h2>
+                <button class="btn btn-dark rounded-pill fw-bold" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 text-center align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 80px;">Pos</th>
+                                <th class="text-start">Participante</th>
+                                <th>Campeão Escolhido</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ranking-body">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p class="text-muted small mt-3 text-center">Nota: O sistema exato de pontos (para acertos de grupos e fases) será ativado quando a Copa começar.</p>
+        </div>
+    </div>
+
+    <!-- TELA ACOMPANHAMENTO -->
+    <div id="tela-acompanhamento" style="display: none; min-height: 100vh; background-color: #f4f7f6; padding: 40px 0;">
+        <div class="container text-center">
+            <div class="d-flex justify-content-between align-items-center mb-5 text-start">
+                <h2 class="fw-bold mb-0">🌍 Acompanhamento Oficial</h2>
+                <button class="btn btn-dark rounded-pill fw-bold" onclick="voltarAoMenu()">⬅️ Voltar ao Menu</button>
+            </div>
+            <h4 class="fw-bold text-start mb-4" style="color: #4A00E0;">Próximos Jogos</h4>
+            <div id="lista-jogos-oficiais" class="pb-5">
+                <div class="py-5 bg-white rounded-4 shadow-sm">
+                    <div style="font-size: 5rem; opacity: 0.2;">⏳</div>
+                    <h3 class="fw-bold mt-4 text-muted">A carregar jogos...</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="conteudo-bolao" style="display: none;">
+        
+        <header class="header-bg text-white text-center py-4 mb-4 shadow pdf-hide">
+            <div class="container position-relative">
+                <div class="position-absolute top-0 end-0 mt-2 text-end" style="z-index: 100;">
+                    <button id="btn-editar-palpites" class="btn btn-sm btn-warning fw-bold shadow-sm rounded-pill px-2 px-md-3 mb-1 mb-md-0 d-none" onclick="ativarModoLeitura(false)">✏️ Editar</button>
+                    <button class="btn btn-sm btn-light fw-bold shadow-sm rounded-pill px-2 px-md-3 text-dark" onclick="voltarAoMenu()">⬅️ Menu</button>
+                </div>
+                <h1 class="display-6 fw-bold mb-1 mt-4 mt-md-0">🏆 Bolão Copa 2026</h1>
+                <p class="mb-0 fw-bold">O Palpite de Cristal: Fase de Grupos e Chaveamento</p>
+            </div>
+        </header>
+
+        <div class="container-fluid mb-5 px-3">
+            <ul class="nav nav-pills justify-content-center mb-4 nav-master pdf-hide" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="tab-btn-grupos" data-bs-toggle="tab" data-bs-target="#tab-grupos" type="button" role="tab">FASE DE GRUPOS</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-btn-matamata" data-bs-toggle="tab" data-bs-target="#tab-matamata" type="button" role="tab" disabled>MATA-MATA</button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane fade show active container" id="tab-grupos" role="tabpanel">
+                    <div class="d-flex justify-content-center mb-4 sticky-top pt-2 pdf-hide" style="z-index: 1000; top: 0;">
+                        <div class="btn-group shadow-sm bg-white rounded-pill p-1" role="group">
+                            <button type="button" class="btn btn-outline-primary btn-rodada-global active rounded-pill px-4" id="btn-topo-1" onclick="mudarRodadaGeral(1)">1ª Rodada</button>
+                            <button type="button" class="btn btn-outline-primary btn-rodada-global rounded-pill px-4 mx-1" id="btn-topo-2" onclick="mudarRodadaGeral(2)">2ª Rodada</button>
+                            <button type="button" class="btn btn-outline-primary btn-rodada-global rounded-pill px-4" id="btn-topo-3" onclick="mudarRodadaGeral(3)">3ª Rodada</button>
+                        </div>
+                    </div>
+
+                    <div class="row" id="grid-grupos"></div>
+
+                    <div class="text-center mt-5 p-4 bg-white rounded-4 shadow border pdf-hide">
+                        <button class="btn btn-primary btn-lg px-5 py-3 shadow fw-bold" style="background:#4A00E0; border:none;" id="btn-proxima-rodada" onclick="avancarRodadaBotao()">➡️ Ir para a próxima Rodada</button>
+                        <button class="btn btn-dark btn-lg px-5 py-3 shadow d-none fw-bold" style="color:#00E5FF;" id="btn-gerar-matamata" onclick="iniciarMataMata()">⚔️ Gerar Chaveamento</button>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="tab-matamata" role="tabpanel">
+                    <div class="bracket-wrapper" id="bracket-container"></div>
+                    
+                    <div class="text-center mt-4 mb-5 pdf-hide">
+                        <button class="btn btn-lg px-5 py-3 shadow fw-bold d-none me-2" style="background: linear-gradient(90deg, #FF007F, #4A00E0); color:white; border:none;" id="btn-salvar-bolao" onclick="salvarBolao()">🏆 Guardar Bolão no Banco</button>
+                        <button class="btn btn-dark btn-lg px-4 py-3 shadow fw-bold d-none" id="btn-gerar-pdf" onclick="gerarPDF()">📥 Exportar PDF</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+        // ==========================================
+        // 1. LIGAÇÃO AO SUPABASE
+        // ==========================================
+        // ATENÇÃO: Substitua pelas suas chaves do Supabase!
+        const supabaseUrl = 'https://zhewuwemyyppmgpgudqr.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoZXd1d2VteXlwcG1ncGd1ZHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyODk0NDgsImV4cCI6MjA5NTg2NTQ0OH0.KGIl9nXVqQ1gtQARmL98NmRqHR43XqGvwTaJIVY_9_Q';
+        
+        let supabaseClient = null; // Variável renomeada para evitar conflitos!
+
+        // Usa o objeto global window.supabase para criar o cliente
+        if (supabaseUrl && supabaseKey) {
+            supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        } else {
+            console.warn("Supabase não configurado. O sistema usará um 'Mock' (simulação) local para o login.");
+        }
+
+        let usuarioLogado = null;
+
+        // ==========================================
+        // 2. AUTENTICAÇÃO (LOGIN / REGISTO)
+        // ==========================================
+        let isLoginMode = true;
+
+        function alternarModoAuth(event) {
+            event.preventDefault();
+            isLoginMode = !isLoginMode;
+            document.getElementById('container-nome').classList.toggle('d-none', isLoginMode);
+            document.getElementById('btn-submit').innerText = isLoginMode ? "ENTRAR NO BOLÃO" : "CRIAR CONTA";
+            document.getElementById('texto-alternar').innerHTML = isLoginMode 
+                ? 'Não tem uma conta? <a href="#" class="fw-bold" style="color: #FF007F; text-decoration: none;" onclick="alternarModoAuth(event)">Criar Registo</a>'
+                : 'Já tem conta? <a href="#" class="fw-bold" style="color: #4A00E0; text-decoration: none;" onclick="alternarModoAuth(event)">Fazer Login</a>';
+        }
+
+        async function processarAuth(event) {
+            event.preventDefault();
+            let email = document.getElementById('login-email').value;
+            let senha = document.getElementById('login-senha').value;
+            let btn = document.getElementById('btn-submit');
+            
+            if (!email || senha.length < 6) {
+                alert("Insira um e-mail válido e uma palavra-passe com pelo menos 6 caracteres.");
+                return;
+            }
+
+            if (!supabaseClient) {
+                alert("Erro crítico: Cliente Supabase não configurado.");
+                return;
+            }
+
+            btn.innerText = "A processar...";
+            btn.disabled = true;
+
+            if (isLoginMode) {
+                // Fazer Login Nativo
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+                if (error) {
+                    alert("Erro ao entrar: " + error.message);
+                } else {
+                    // Usamos o metadata nativo do Supabase Auth em vez de buscar numa tabela de usuarios externa
+                    let nomeUsuario = data.user.user_metadata?.nome || email.split('@')[0];
+                    usuarioLogado = { id: data.user.id, email: data.user.email, nome: nomeUsuario };
+                    liberarAcesso();
+                }
+            } else {
+                // Criar Registo Nativo
+                let nome = document.getElementById('login-nome').value;
+                if (!nome) { alert("Por favor, preencha o seu nome."); btn.disabled = false; btn.innerText = "CRIAR CONTA"; return; }
+                
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email, password: senha, options: { data: { nome: nome } }
+                });
+                
+                if (error) {
+                    alert("Erro ao criar conta: " + error.message);
+                } else {
+                    alert(`Conta criada com sucesso, ${nome}! Já pode iniciar sessão.`);
+                    alternarModoAuth(new Event('click')); // Volta para o login
+                    document.getElementById('login-senha').value = '';
+                }
+            }
+            
+            btn.disabled = false;
+            if (isLoginMode) btn.innerText = "ENTRAR NO BOLÃO";
+        }
+
+        async function liberarAcesso() {
+            document.getElementById('dash-usuario-nome').innerText = usuarioLogado.nome;
+            abrirTela('tela-dashboard');
+            await carregarMeusPalpites();
+        }
+
+        let isModoLeitura = false;
+
+        function ativarModoLeitura(ativo) {
+            isModoLeitura = ativo;
+            document.querySelectorAll('.placar-input').forEach(inp => inp.disabled = ativo);
+            
+            let bracketWrapper = document.getElementById('bracket-container');
+            if(ativo) {
+                bracketWrapper.style.pointerEvents = 'none';
+                document.getElementById('btn-editar-palpites').classList.remove('d-none');
+                document.getElementById('btn-salvar-bolao').classList.add('d-none');
+            } else {
+                bracketWrapper.style.pointerEvents = 'auto';
+                document.getElementById('btn-editar-palpites').classList.add('d-none');
+                document.getElementById('btn-salvar-bolao').classList.remove('d-none');
+                // Adicionamos scroll para que o user note onde guardar
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        }
+
+        async function carregarMeusPalpites() {
+            inicializarGrupos();
+            if(!supabaseClient) return;
+
+            try {
+                const { data: dbPalpitesJogos } = await supabaseClient.from('palpites_jogos').select('jogo_id, gols_mandante, gols_visitante').eq('usuario_id', usuarioLogado.id);
+                const { data: dbPalpitesClassificacao } = await supabaseClient.from('palpites_classificacao').select('selecao_id, fase_maxima_alcancada').eq('usuario_id', usuarioLogado.id);
+
+                if (dbPalpitesClassificacao && dbPalpitesClassificacao.length > 0) {
+                    ativarModoLeitura(true);
+
+                    if (dbPalpitesJogos && dbPalpitesJogos.length > 0) {
+                        const { data: dbJogos } = await supabaseClient.from('jogos').select('id, mandante_id, visitante_id');
+                        let mapJogosToAbrv = {};
+                        if(dbJogos) dbJogos.forEach(j => { mapJogosToAbrv[j.id] = { m: j.mandante_id, v: j.visitante_id }; });
+
+                        Object.keys(jogosData).forEach(letra => {
+                            [1, 2, 3].forEach(r => {
+                                jogosData[letra][r].forEach((jogo, idx) => {
+                                    let mId = getAbrv(jogo.mandante);
+                                    let vId = getAbrv(jogo.visitante);
+                                    let idReal = Object.keys(mapJogosToAbrv).find(key => mapJogosToAbrv[key].m === mId && mapJogosToAbrv[key].v === vId);
+                                    if(idReal) {
+                                        let palpiteSalvo = dbPalpitesJogos.find(p => p.jogo_id == idReal);
+                                        if(palpiteSalvo) {
+                                            document.getElementById(`in-${letra}-r${r}-j${idx}-m`).value = palpiteSalvo.gols_mandante;
+                                            document.getElementById(`in-${letra}-r${r}-j${idx}-v`).value = palpiteSalvo.gols_visitante;
+                                        }
+                                    }
+                                });
+                            });
+                            atualizarClassificacao(letra);
+                        });
+                    }
+
+                    document.getElementById('btn-gerar-matamata').classList.remove('d-none');
+                    iniciarMataMata();
+
+                    let dictFases = {};
+                    dbPalpitesClassificacao.forEach(p => { dictFases[p.selecao_id] = p.fase_maxima_alcancada; });
+
+                    function preencherBracketAutomaticamente() {
+                        let fasesAceites = {
+                            'Oitavas de Final': ['Oitavas de Final', 'Quartas de Final', 'Semifinalista', 'Finalista', 'Campeão'],
+                            'Quartas de Final': ['Quartas de Final', 'Semifinalista', 'Finalista', 'Campeão'],
+                            'Semifinalista': ['Semifinalista', 'Finalista', 'Campeão'],
+                            'Finalista': ['Finalista', 'Campeão'],
+                            'Campeão': ['Campeão']
+                        };
+                        for (let i = 0; i <= 30; i++) {
+                            let match = bracketMatches[i];
+                            let req = i <= 15 ? 'Oitavas de Final' : (i <= 23 ? 'Quartas de Final' : (i <= 27 ? 'Semifinalista' : (i <= 29 ? 'Finalista' : 'Campeão')));
+                            if (match.t1 && match.t2 && !match.winner) {
+                                let f1 = dictFases[getAbrv(match.t1)];
+                                let f2 = dictFases[getAbrv(match.t2)];
+                                if (f1 && fasesAceites[req].includes(f1)) setWinner(i, match.t1);
+                                else if (f2 && fasesAceites[req].includes(f2)) setWinner(i, match.t2);
+                            }
+                        }
+                    }
+
+                    for(let k=0; k<5; k++) preencherBracketAutomaticamente();
+
+                } else {
+                    ativarModoLeitura(false);
+                }
+            } catch(e) { console.error("Erro ao carregar palpites", e); }
+        }
+
+        function abrirTela(telaId) {
+            ['tela-login', 'tela-dashboard', 'conteudo-bolao', 'tela-ranking', 'tela-acompanhamento'].forEach(id => {
+                let el = document.getElementById(id);
+                if(el) el.style.display = (id === telaId) ? (id === 'tela-login' ? 'flex' : 'block') : 'none';
+            });
+            window.scrollTo(0,0);
+        }
+
+        function voltarAoMenu() {
+            abrirTela('tela-dashboard');
+        }
+
+        async function abrirRanking() {
+            abrirTela('tela-ranking');
+            let tbody = document.getElementById('ranking-body');
+            tbody.innerHTML = '<tr><td colspan="3" class="py-4">⏳ A carregar ranking...</td></tr>';
+            
+            if(!supabaseClient) {
+                tbody.innerHTML = '<tr><td colspan="3" class="py-4 text-danger">Supabase não configurado.</td></tr>';
+                return;
+            }
+            
+            try {
+                // Fazer JOIN com a tabela 'usuarios' usando o esquema real do utilizador
+                const { data, error } = await supabaseClient
+                    .from('palpites_classificacao')
+                    .select('selecao_id, fase_maxima_alcancada, usuarios(nome)')
+                    .eq('fase_maxima_alcancada', 'Campeão');
+                
+                if (error) throw error;
+                
+                let html = '';
+                let pos = 1;
+                
+                if (data && data.length > 0) {
+                    data.forEach(d => {
+                        let medalha = pos === 1 ? '🥇' : (pos === 2 ? '🥈' : (pos === 3 ? '🥉' : pos+'º'));
+                        let nome = (d.usuarios && d.usuarios.nome) ? d.usuarios.nome : 'Participante';
+                        let campeao = d.selecao_id;
+                        
+                        html += `
+                            <tr class="ranking-row">
+                                <td class="fw-bold fs-5">${medalha}</td>
+                                <td class="text-start fw-bold" style="color: #4A00E0;">${nome}</td>
+                                <td class="fw-bold">${getFlagImgHTML(campeao, true)} ${campeao}</td>
+                            </tr>
+                        `;
+                        pos++;
+                    });
+                }
+                
+                if(html === '') html = '<tr><td colspan="3" class="py-4 text-muted">Ainda não há campeões guardados no sistema.</td></tr>';
+                tbody.innerHTML = html;
+                
+            } catch (err) {
+                console.error("Erro no ranking:", err);
+                tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-danger">Erro ao carregar o ranking.<br><small>${err.message}</small></td></tr>`;
+            }
+        }
+
+        async function abrirAcompanhamento() {
+            abrirTela('tela-acompanhamento');
+            let divJogos = document.getElementById('lista-jogos-oficiais');
+            divJogos.innerHTML = '<div class="py-5"><h5 class="fw-bold text-muted">⏳ A carregar próximos jogos...</h5></div>';
+            
+            if(!supabaseClient) {
+                divJogos.innerHTML = '<p class="text-danger">Supabase não configurado.</p>';
+                return;
+            }
+
+            try {
+                // Procurar próximos jogos onde golos ainda são null
+                const { data, error } = await supabaseClient
+                    .from('jogos')
+                    .select('fase, mandante_id, visitante_id, data_jogo, gols_mandante')
+                    .order('data_jogo', { ascending: true });
+                
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    let html = '';
+                    let count = 0;
+                    data.forEach(j => {
+                        if (j.gols_mandante === null && count < 20) {
+                            let dataObj = new Date(j.data_jogo);
+                            let dataStr = isNaN(dataObj) ? "Data a definir" : dataObj.toLocaleDateString('pt-PT') + " " + dataObj.toLocaleTimeString('pt-PT', {hour: '2-digit', minute:'2-digit'});
+                            
+                            html += `
+                                <div class="card mb-3 border-0 shadow-sm rounded-4 text-start" style="transition: transform 0.2s;">
+                                    <div class="card-body px-4 py-3">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span class="badge bg-secondary">${j.fase}</span>
+                                            <small class="text-muted fw-bold">📅 ${dataStr}</small>
+                                        </div>
+                                        <div class="d-flex justify-content-center align-items-center fw-bold fs-5">
+                                            <div class="text-end" style="width: 40%;">${getFullTeamName(j.mandante_id)} ${getFlagImgHTML(j.mandante_id, true)}</div>
+                                            <div class="text-center text-muted mx-3">X</div>
+                                            <div class="text-start" style="width: 40%;">${getFlagImgHTML(j.visitante_id, true)} ${getFullTeamName(j.visitante_id)}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            count++;
+                        }
+                    });
+                    
+                    if (html === '') {
+                        divJogos.innerHTML = '<p class="text-muted fs-5 mt-5">Não há jogos pendentes agendados na base de dados.</p>';
+                    } else {
+                        divJogos.innerHTML = html;
+                    }
+                } else {
+                    divJogos.innerHTML = '<p class="text-muted fs-5 mt-5">A tabela de jogos está vazia.</p>';
+                }
+            } catch (err) {
+                console.error("Erro no acompanhamento:", err);
+                divJogos.innerHTML = '<p class="text-danger">Erro ao carregar os jogos.</p>';
+            }
+        }
+
+        async function fazerLogout() {
+            if(supabaseClient) await supabaseClient.auth.signOut();
+            usuarioLogado = null;
+            document.getElementById('login-senha').value = '';
+            document.querySelector('.btn-login').innerText = "ENTRAR NO BOLÃO";
+            abrirTela('tela-login');
+        }
+
+        // ==========================================
+        // 3. DADOS E BANDEIRAS REAIS
+        // ==========================================
+        const flagsImg = {
+            "México": "https://flagcdn.com/mx.svg", "Coreia do Sul": "https://flagcdn.com/kr.svg", "República Tcheca": "https://flagcdn.com/cz.svg", "África do Sul": "https://flagcdn.com/za.svg",
+            "Canadá": "https://flagcdn.com/ca.svg", "Catar": "https://flagcdn.com/qa.svg", "Suíça": "https://flagcdn.com/ch.svg", "Bósnia e Herzegovina": "https://flagcdn.com/ba.svg",
+            "Brasil": "https://flagcdn.com/br.svg", "Haiti": "https://flagcdn.com/ht.svg", "Escócia": "https://flagcdn.com/gb-sct.svg", "Marrocos": "https://flagcdn.com/ma.svg",
+            "Estados Unidos": "https://flagcdn.com/us.svg", "Austrália": "https://flagcdn.com/au.svg", "Turquia": "https://flagcdn.com/tr.svg", "Paraguai": "https://flagcdn.com/py.svg",
+            "Alemanha": "https://flagcdn.com/de.svg", "Costa do Marfim": "https://flagcdn.com/ci.svg", "Equador": "https://flagcdn.com/ec.svg", "Curaçao": "https://flagcdn.com/cw.svg",
+            "Holanda": "https://flagcdn.com/nl.svg", "Suécia": "https://flagcdn.com/se.svg", "Tunísia": "https://flagcdn.com/tn.svg", "Japão": "https://flagcdn.com/jp.svg",
+            "Bélgica": "https://flagcdn.com/be.svg", "Irã": "https://flagcdn.com/ir.svg", "Nova Zelândia": "https://flagcdn.com/nz.svg", "Egito": "https://flagcdn.com/eg.svg",
+            "Espanha": "https://flagcdn.com/es.svg", "Arábia Saudita": "https://flagcdn.com/sa.svg", "Uruguai": "https://flagcdn.com/uy.svg", "Cabo Verde": "https://flagcdn.com/cv.svg",
+            "França": "https://flagcdn.com/fr.svg", "Iraque": "https://flagcdn.com/iq.svg", "Noruega": "https://flagcdn.com/no.svg", "Senegal": "https://flagcdn.com/sn.svg",
+            "Argentina": "https://flagcdn.com/ar.svg", "Áustria": "https://flagcdn.com/at.svg", "Jordânia": "https://flagcdn.com/jo.svg", "Argélia": "https://flagcdn.com/dz.svg",
+            "Portugal": "https://flagcdn.com/pt.svg", "Uzbequistão": "https://flagcdn.com/uz.svg", "Colômbia": "https://flagcdn.com/co.svg", "RD Congo": "https://flagcdn.com/cd.svg",
+            "Inglaterra": "https://flagcdn.com/gb-eng.svg", "Gana": "https://flagcdn.com/gh.svg", "Panamá": "https://flagcdn.com/pa.svg", "Croácia": "https://flagcdn.com/hr.svg"
+        };
+
+        const abrvMap = {
+            "México": "MEX", "Coreia do Sul": "COR", "República Tcheca": "CZE", "África do Sul": "AFS",
+            "Canadá": "CAN", "Catar": "CAT", "Suíça": "SUI", "Bósnia e Herzegovina": "BOS",
+            "Brasil": "BRA", "Haiti": "HAI", "Escócia": "ESC", "Marrocos": "MAR",
+            "Estados Unidos": "EUA", "Austrália": "AUS", "Turquia": "TUR", "Paraguai": "PAR",
+            "Alemanha": "ALE", "Costa do Marfim": "CIV", "Equador": "EQU", "Curaçao": "CUR",
+            "Holanda": "HOL", "Suécia": "SUE", "Tunísia": "TUN", "Japão": "JAP",
+            "Bélgica": "BEL", "Irã": "IRA", "Nova Zelândia": "NZE", "Egito": "EGI",
+            "Espanha": "ESP", "Arábia Saudita": "ARA", "Uruguai": "URU", "Cabo Verde": "CAB",
+            "França": "FRA", "Iraque": "IRQ", "Noruega": "NOR", "Senegal": "SEN",
+            "Argentina": "ARG", "Áustria": "AUT", "Jordânia": "JOR", "Argélia": "AGL",
+            "Portugal": "POR", "Uzbequistão": "UZB", "Colômbia": "COL", "RD Congo": "RDC",
+            "Inglaterra": "ING", "Gana": "GAN", "Panamá": "PAN", "Croácia": "CRO"
+        };
+
+        function getAbrv(name) { return abrvMap[name] || name.substring(0,3).toUpperCase(); }
+        function getFullTeamName(abrv) {
+            let nome = Object.keys(abrvMap).find(key => abrvMap[key] === abrv);
+            return nome || abrv;
+        }
+        function getFlagImgHTML(name, isTable = false) { 
+            // tenta obter nome real caso receba abreviação
+            let nomeReal = getFullTeamName(name);
+            return (nomeReal && flagsImg[nomeReal]) ? `<img src="${flagsImg[nomeReal]}" class="${isTable ? "flag-table" : ""}" alt="${nomeReal}">` : ""; 
+        }
+
+        const gruposData = {
+            "A": ["México", "Coreia do Sul", "República Tcheca", "África do Sul"], "B": ["Canadá", "Catar", "Suíça", "Bósnia e Herzegovina"],
+            "C": ["Brasil", "Haiti", "Escócia", "Marrocos"], "D": ["Estados Unidos", "Austrália", "Turquia", "Paraguai"],
+            "E": ["Alemanha", "Costa do Marfim", "Equador", "Curaçao"], "F": ["Holanda", "Suécia", "Tunísia", "Japão"],
+            "G": ["Bélgica", "Irã", "Nova Zelândia", "Egito"], "H": ["Espanha", "Arábia Saudita", "Uruguai", "Cabo Verde"],
+            "I": ["França", "Iraque", "Noruega", "Senegal"], "J": ["Argentina", "Áustria", "Jordânia", "Argélia"],
+            "K": ["Portugal", "Uzbequistão", "Colômbia", "RD Congo"], "L": ["Inglaterra", "Gana", "Panamá", "Croácia"]
+        };
+
+        const jogosData = {"A":{"1":[{"mandante":"México","visitante":"África do Sul"},{"mandante":"Coreia do Sul","visitante":"República Tcheca"}],"2":[{"mandante":"República Tcheca","visitante":"África do Sul"},{"mandante":"México","visitante":"Coreia do Sul"}],"3":[{"mandante":"República Tcheca","visitante":"México"},{"mandante":"África do Sul","visitante":"Coreia do Sul"}]},"B":{"1":[{"mandante":"Canadá","visitante":"Bósnia e Herzegovina"},{"mandante":"Catar","visitante":"Suíça"}],"2":[{"mandante":"Suíça","visitante":"Bósnia e Herzegovina"},{"mandante":"Canadá","visitante":"Catar"}],"3":[{"mandante":"Suíça","visitante":"Canadá"},{"mandante":"Bósnia e Herzegovina","visitante":"Catar"}]},"C":{"1":[{"mandante":"Brasil","visitante":"Marrocos"},{"mandante":"Haiti","visitante":"Escócia"}],"2":[{"mandante":"Escócia","visitante":"Marrocos"},{"mandante":"Brasil","visitante":"Haiti"}],"3":[{"mandante":"Escócia","visitante":"Brasil"},{"mandante":"Marrocos","visitante":"Haiti"}]},"D":{"1":[{"mandante":"Estados Unidos","visitante":"Paraguai"},{"mandante":"Austrália","visitante":"Turquia"}],"2":[{"mandante":"Turquia","visitante":"Paraguai"},{"mandante":"Estados Unidos","visitante":"Austrália"}],"3":[{"mandante":"Turquia","visitante":"Estados Unidos"},{"mandante":"Paraguai","visitante":"Austrália"}]},"E":{"1":[{"mandante":"Alemanha","visitante":"Curaçao"},{"mandante":"Costa do Marfim","visitante":"Equador"}],"2":[{"mandante":"Alemanha","visitante":"Costa do Marfim"},{"mandante":"Equador","visitante":"Curaçao"}],"3":[{"mandante":"Equador","visitante":"Alemanha"},{"mandante":"Curaçao","visitante":"Costa do Marfim"}]},"F":{"1":[{"mandante":"Holanda","visitante":"Japão"},{"mandante":"Suécia","visitante":"Tunísia"}],"2":[{"mandante":"Holanda","visitante":"Suécia"},{"mandante":"Tunísia","visitante":"Japão"}],"3":[{"mandante":"Tunísia","visitante":"Holanda"},{"mandante":"Japão","visitante":"Suécia"}]},"G":{"1":[{"mandante":"Bélgica","visitante":"Egito"},{"mandante":"Irã","visitante":"Nova Zelândia"}],"2":[{"mandante":"Bélgica","visitante":"Irã"},{"mandante":"Nova Zelândia","visitante":"Egito"}],"3":[{"mandante":"Nova Zelândia","visitante":"Bélgica"},{"mandante":"Egito","visitante":"Irã"}]},"H":{"1":[{"mandante":"Espanha","visitante":"Cabo Verde"},{"mandante":"Arábia Saudita","visitante":"Uruguai"}],"2":[{"mandante":"Espanha","visitante":"Arábia Saudita"},{"mandante":"Uruguai","visitante":"Cabo Verde"}],"3":[{"mandante":"Uruguai","visitante":"Espanha"},{"mandante":"Cabo Verde","visitante":"Arábia Saudita"}]},"I":{"1":[{"mandante":"França","visitante":"Senegal"},{"mandante":"Iraque","visitante":"Noruega"}],"2":[{"mandante":"França","visitante":"Iraque"},{"mandante":"Noruega","visitante":"Senegal"}],"3":[{"mandante":"Noruega","visitante":"França"},{"mandante":"Senegal","visitante":"Iraque"}]},"J":{"1":[{"mandante":"Argentina","visitante":"Argélia"},{"mandante":"Áustria","visitante":"Jordânia"}],"2":[{"mandante":"Argentina","visitante":"Áustria"},{"mandante":"Jordânia","visitante":"Argélia"}],"3":[{"mandante":"Jordânia","visitante":"Argentina"},{"mandante":"Argélia","visitante":"Áustria"}]},"K":{"1":[{"mandante":"Portugal","visitante":"RD Congo"},{"mandante":"Uzbequistão","visitante":"Colômbia"}],"2":[{"mandante":"Portugal","visitante":"Uzbequistão"},{"mandante":"Colômbia","visitante":"RD Congo"}],"3":[{"mandante":"Colômbia","visitante":"Portugal"},{"mandante":"RD Congo","visitante":"Uzbequistão"}]},"L":{"1":[{"mandante":"Inglaterra","visitante":"Croácia"},{"mandante":"Gana","visitante":"Panamá"}],"2":[{"mandante":"Inglaterra","visitante":"Gana"},{"mandante":"Panamá","visitante":"Croácia"}],"3":[{"mandante":"Panamá","visitante":"Inglaterra"},{"mandante":"Croácia","visitante":"Gana"}]}};
+
+        let rodadaGlobal = 1;
+        let classificacaoFinalGrupos = {}; 
+        
+        const bracketMap = [
+            { id: 0, next: 16, slot: 't1' }, { id: 1, next: 17, slot: 't1' }, { id: 2, next: 16, slot: 't2' }, { id: 3, next: 18, slot: 't1' },
+            { id: 4, next: 17, slot: 't2' }, { id: 5, next: 18, slot: 't2' }, { id: 6, next: 19, slot: 't1' }, { id: 7, next: 19, slot: 't2' },
+            { id: 8, next: 20, slot: 't1' }, { id: 9, next: 20, slot: 't2' }, { id: 10, next: 21, slot: 't1' }, { id: 11, next: 21, slot: 't2' },
+            { id: 12, next: 22, slot: 't1' }, { id: 13, next: 23, slot: 't1' }, { id: 14, next: 22, slot: 't2' }, { id: 15, next: 23, slot: 't2' },
+            { id: 16, next: 24, slot: 't1' }, { id: 17, next: 24, slot: 't2' }, { id: 18, next: 25, slot: 't1' }, { id: 19, next: 25, slot: 't2' },
+            { id: 20, next: 26, slot: 't2' }, { id: 21, next: 26, slot: 't1' }, { id: 22, next: 27, slot: 't2' }, { id: 23, next: 27, slot: 't1' },
+            { id: 24, next: 28, slot: 't1' }, { id: 25, next: 28, slot: 't2' }, { id: 26, next: 29, slot: 't1' }, { id: 27, next: 29, slot: 't2' },
+            { id: 28, next: 30, slot: 't1' }, { id: 29, next: 30, slot: 't2' }, { id: 30, next: null, slot: null }
+        ];
+        let bracketMatches = [];
+
+        // ==========================================
+        // 4. LÓGICAS DO BOLÃO (Grupos e Mata-Mata)
+        // ==========================================
+        function inicializarGrupos() {
+            const gridContainer = document.getElementById('grid-grupos');
+            gridContainer.innerHTML = ""; 
+            
+            Object.keys(gruposData).forEach(letra => {
+                let col = document.createElement('div'); col.className = 'col-xl-6 mb-4';
+                let htmlCard = `<div class="card card-grupo h-100 border-0">
+                    <div class="group-title d-flex justify-content-between align-items-center">
+                        <span>GRUPO ${letra}</span><span class="badge badge-rodada small" id="badge-rodada-${letra}">1ª Rodada</span>
+                    </div>
+                    <div class="card-body p-3"><div class="row g-3"><div class="col-md-6 border-end">`;
+                [1, 2, 3].forEach(r => {
+                    htmlCard += `<div id="pane-${letra}-r${r}" class="pane-rodada ${r === 1 ? '' : 'd-none'}">`;
+                    jogosData[letra][r].forEach((jogo, idx) => {
+                        htmlCard += `
+                            <div class="jogo-row d-flex align-items-center justify-content-between p-2">
+                                <div class="text-end fw-bold text-truncate flex-grow-1 pe-2" style="font-size:0.85rem;">${jogo.mandante}</div>
+                                <div class="d-flex align-items-center">
+                                    <input type="number" class="form-control form-control-sm placar-input" min="0" id="in-${letra}-r${r}-j${idx}-m" oninput="atualizarClassificacao('${letra}')">
+                                    <span class="mx-1 text-muted fw-bold">x</span>
+                                    <input type="number" class="form-control form-control-sm placar-input" min="0" id="in-${letra}-r${r}-j${idx}-v" oninput="atualizarClassificacao('${letra}')">
+                                </div>
+                                <div class="text-start fw-bold text-truncate flex-grow-1 ps-2" style="font-size:0.85rem;">${jogo.visitante}</div>
+                            </div>`;
+                    });
+                    htmlCard += `</div>`;
+                });
+                htmlCard += `</div><div class="col-md-6"><div class="table-responsive"><table class="table table-sm table-hover table-classificacao text-center mb-0">
+                                        <thead><tr class="table-light"><th class="text-start">Seleção</th><th>P</th><th>SG</th><th>GP</th><th>GC</th></tr></thead>
+                                        <tbody id="tb-${letra}"></tbody>
+                                    </table></div></div></div></div></div>`;
+                col.innerHTML = htmlCard;
+                gridContainer.appendChild(col);
+                atualizarClassificacao(letra);
+            });
+        }
+
+        function mudarRodadaGeral(rodadaDestino) {
+            rodadaGlobal = rodadaDestino;
+            [1, 2, 3].forEach(r => {
+                let btn = document.getElementById(`btn-topo-${r}`);
+                if(btn) btn.classList.toggle('active', r === rodadaGlobal);
+            });
+            Object.keys(gruposData).forEach(letra => {
+                document.getElementById(`badge-rodada-${letra}`).innerText = `${rodadaGlobal}ª Rodada`;
+                [1, 2, 3].forEach(r => document.getElementById(`pane-${letra}-r${r}`).classList.toggle('d-none', r !== rodadaGlobal));
+            });
+            if (rodadaGlobal < 3) {
+                document.getElementById('btn-proxima-rodada').classList.remove('d-none');
+                document.getElementById('btn-gerar-matamata').classList.add('d-none');
+            } else {
+                document.getElementById('btn-proxima-rodada').classList.add('d-none');
+                document.getElementById('btn-gerar-matamata').classList.remove('d-none');
+            }
+        }
+
+        function avancarRodadaBotao() { if (rodadaGlobal < 3) { mudarRodadaGeral(rodadaGlobal + 1); window.scrollTo(0,0); } }
+
+        function atualizarClassificacao(letra) {
+            let stats = {};
+            gruposData[letra].forEach(t => { stats[t] = { pts: 0, sg: 0, gp: 0, gc: 0, nome: t, grupo: letra }; });
+            [1, 2, 3].forEach(r => {
+                jogosData[letra][r].forEach((jogo, idx) => {
+                    let inM = document.getElementById(`in-${letra}-r${r}-j${idx}-m`), inV = document.getElementById(`in-${letra}-r${r}-j${idx}-v`);
+                    if(inM && inV && inM.value !== "" && inV.value !== "") {
+                        let gM = parseInt(inM.value), gV = parseInt(inV.value);
+                        stats[jogo.mandante].gp += gM; stats[jogo.mandante].gc += gV;
+                        stats[jogo.visitante].gp += gV; stats[jogo.visitante].gc += gM;
+                        stats[jogo.mandante].sg += (gM - gV); stats[jogo.visitante].sg += (gV - gM);
+                        if(gM > gV) stats[jogo.mandante].pts += 3;
+                        else if(gV > gM) stats[jogo.visitante].pts += 3;
+                        else { stats[jogo.mandante].pts += 1; stats[jogo.visitante].pts += 1; }
+                    }
+                });
+            });
+
+            let arr = Object.values(stats).sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+            classificacaoFinalGrupos[letra] = arr;
+            let tbody = document.getElementById(`tb-${letra}`);
+            tbody.innerHTML = "";
+            arr.forEach((time, idx) => {
+                let color = idx < 2 ? 'zona-classificacao text-dark' : 'text-muted';
+                tbody.innerHTML += `
+                    <tr class="${color}">
+                        <td class="text-start text-truncate" style="max-width:90px;">${idx+1}º ${getFlagImgHTML(time.nome, true)} ${time.nome}</td>
+                        <td class="text-success fw-bold">${time.pts}</td>
+                        <td>${time.sg > 0 ? '+'+time.sg : time.sg}</td>
+                        <td>${time.gp}</td><td>${time.gc}</td>
+                    </tr>`;
+            });
+            atualizarMelhoresTerceiros();
+        }
+
+        function atualizarMelhoresTerceiros() {
+            if (Object.keys(classificacaoFinalGrupos).length < 12) return;
+            
+            let terceiros = [];
+            Object.keys(classificacaoFinalGrupos).forEach(l => {
+                if(classificacaoFinalGrupos[l] && classificacaoFinalGrupos[l].length > 2) {
+                    terceiros.push({ grupo: l, pts: classificacaoFinalGrupos[l][2].pts, sg: classificacaoFinalGrupos[l][2].sg, gp: classificacaoFinalGrupos[l][2].gp, nome: classificacaoFinalGrupos[l][2].nome });
+                }
+            });
+            
+            terceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+            let classificados = terceiros.slice(0, 8).map(x => x.nome);
+            
+            Object.keys(classificacaoFinalGrupos).forEach(l => {
+                let tbody = document.getElementById(`tb-${l}`);
+                if (!tbody) return;
+                let trs = tbody.querySelectorAll('tr');
+                if (trs.length > 2) {
+                    let tr3 = trs[2];
+                    let nomeT3 = classificacaoFinalGrupos[l][2].nome;
+                    if (classificados.includes(nomeT3)) {
+                        tr3.className = 'zona-terceiro-classificado text-dark fw-bold';
+                    } else {
+                        tr3.className = 'zona-terceiro-eliminado text-muted';
+                    }
+                }
+            });
+        }
+
+        // --- Mata-Mata ---
+        function iniciarMataMata() {
+            document.getElementById('tab-btn-matamata').disabled = false;
+            document.getElementById('tab-btn-matamata').click();
+
+            let P = {}, S = {}, Terceiros = [];
+            Object.keys(classificacaoFinalGrupos).forEach(l => {
+                P[l] = classificacaoFinalGrupos[l][0].nome;
+                S[l] = classificacaoFinalGrupos[l][1].nome;
+                Terceiros.push(classificacaoFinalGrupos[l][2]);
+            });
+            Terceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+            let T = Terceiros.slice(0, 8).map(x => x.nome);
+
+            bracketMatches = bracketMap.map(m => ({ id: m.id, t1: null, t2: null, winner: null, nextMatch: m.next, slotInNext: m.slot }));
+
+            bracketMatches[0].t1 = S['A']; bracketMatches[0].t2 = S['B']; bracketMatches[1].t1 = P['C']; bracketMatches[1].t2 = S['F']; 
+            bracketMatches[2].t1 = P['E']; bracketMatches[2].t2 = T[0];   bracketMatches[3].t1 = P['F']; bracketMatches[3].t2 = S['C']; 
+            bracketMatches[4].t1 = S['E']; bracketMatches[4].t2 = S['I']; bracketMatches[5].t1 = P['I']; bracketMatches[5].t2 = T[1];   
+            bracketMatches[6].t1 = P['A']; bracketMatches[6].t2 = T[2];   bracketMatches[7].t1 = P['L']; bracketMatches[7].t2 = T[3];   
+            bracketMatches[8].t1 = P['G']; bracketMatches[8].t2 = T[4];   bracketMatches[9].t1 = P['D']; bracketMatches[9].t2 = T[5];   
+            bracketMatches[10].t1= P['H']; bracketMatches[10].t2= S['J']; bracketMatches[11].t1= S['K']; bracketMatches[11].t2= S['L'];
+            bracketMatches[12].t1= P['B']; bracketMatches[12].t2= T[6];   bracketMatches[13].t1= S['D']; bracketMatches[13].t2= S['G'];
+            bracketMatches[14].t1= P['J']; bracketMatches[14].t2= S['H']; bracketMatches[15].t1= P['K']; bracketMatches[15].t2= T[7];  
+
+            renderBracket();
+        }
+
+        function setWinner(matchId, teamName) {
+            if (!teamName) return;
+            let match = bracketMatches[matchId];
+            let oldWinner = match.winner;
+            match.winner = teamName;
+            let nextId = match.nextMatch;
+            if (nextId !== null) {
+                bracketMatches[nextId][match.slotInNext] = teamName;
+                if (oldWinner && oldWinner !== teamName) removerPropagacao(nextId, oldWinner);
+            }
+            renderBracket();
+            checkSeTerminou();
+        }
+
+        function removerPropagacao(matchId, teamName) {
+            let match = bracketMatches[matchId];
+            if (match.winner === teamName) {
+                match.winner = null;
+                if (match.nextMatch !== null) {
+                    let next = bracketMatches[match.nextMatch];
+                    if (next.t1 === teamName) next.t1 = null;
+                    if (next.t2 === teamName) next.t2 = null;
+                    removerPropagacao(match.nextMatch, teamName);
+                }
+            }
+        }
+
+        function getChildMatchId(parentId, slot) {
+            let child = bracketMap.find(m => m.next === parentId && m.slot === slot);
+            return child ? child.id : null;
+        }
+
+        function renderOuterTeam(teamName, matchId, isRight) {
+            let abrv = getAbrv(teamName);
+            let flagHTML = getFlagImgHTML(teamName);
+            let htmlInner = isRight 
+                ? `<div class="node-circle filled" style="margin:0;">${flagHTML}</div><span class="node-abrv">${abrv}</span>`
+                : `<span class="node-abrv">${abrv}</span><div class="node-circle filled" style="margin:0;">${flagHTML}</div>`;
+            return `<div class="node-outer" onclick="setWinner(${matchId}, '${teamName}')">${htmlInner}</div>`;
+        }
+
+        function renderCircleNode(matchId, hideLine = false) {
+            let match = bracketMatches[matchId];
+            let team = match.winner;
+            let htmlInterno = team ? getFlagImgHTML(team) : "";
+            let filledClass = team ? "filled" : "empty-circle";
+            let onclick = (team && match.nextMatch !== null) ? `onclick="setWinner(${match.nextMatch}, '${team}')"` : "";
+            return `<div class="node-circle ${filledClass} ${hideLine ? "hide-line" : ""}" ${onclick}>${htmlInterno}</div>`;
+        }
+
+        function renderTreeLeft(matchId) {
+            let match = bracketMatches[matchId];
+            let c1Id = getChildMatchId(matchId, 't1'), c2Id = getChildMatchId(matchId, 't2');
+            let child1HTML = c1Id !== null ? renderTreeLeft(c1Id) : renderOuterTeam(match.t1, matchId, false);
+            let child2HTML = c2Id !== null ? renderTreeLeft(c2Id) : renderOuterTeam(match.t2, matchId, false);
+            return `<div class="bracket-branch"><div class="bracket-children">${child1HTML}${child2HTML}</div><div class="bracket-winner">${renderCircleNode(matchId, matchId === 28)}</div></div>`;
+        }
+
+        function renderTreeRight(matchId) {
+            let match = bracketMatches[matchId];
+            let c1Id = getChildMatchId(matchId, 't1'), c2Id = getChildMatchId(matchId, 't2');
+            let child1HTML = c1Id !== null ? renderTreeRight(c1Id) : renderOuterTeam(match.t1, matchId, true);
+            let child2HTML = c2Id !== null ? renderTreeRight(c2Id) : renderOuterTeam(match.t2, matchId, true);
+            return `<div class="bracket-branch"><div class="bracket-winner">${renderCircleNode(matchId, matchId === 29)}</div><div class="bracket-children">${child1HTML}${child2HTML}</div></div>`;
+        }
+
+        function renderBracket() {
+            let container = document.getElementById('bracket-container');
+            let leftHTML = `<div class="bracket-half bracket-left-side">${renderTreeLeft(28)}</div>`;
+            let rightHTML = `<div class="bracket-half bracket-right-side">${renderTreeRight(29)}</div>`;
+            let trophyContent = bracketMatches[30].winner ? getFlagImgHTML(bracketMatches[30].winner) : `<span class="trophy-icon-placeholder">🏆</span>`;
+            
+            let centerHTML = `
+                <div class="center-final">
+                    <h6 style="color: #4A00E0; font-style: italic; font-weight: 800; text-align: center; margin-bottom: 25px;">
+                        Clique nas seleções<br>vencedoras para<br>simular a árvore.
+                    </h6>
+                    <div class="trophy-container ${bracketMatches[30].winner ? 'winner' : ''}">${trophyContent}</div>
+                </div>
+            `;
+            container.innerHTML = leftHTML + centerHTML + rightHTML;
+        }
+
+        function checkSeTerminou() {
+            let finalizou = bracketMatches[30].winner !== null;
+            document.getElementById('btn-salvar-bolao').classList.toggle('d-none', !finalizou);
+            document.getElementById('btn-gerar-pdf').classList.toggle('d-none', !finalizou);
+        }
+
+        // ==========================================
+        // 5. EXPORTAÇÃO E INTEGRAÇÃO SUPABASE
+        // ==========================================
+        
+        function calcularFaseMaxima(teamNome) {
+            if (bracketMatches[30].winner === teamNome) return 'Campeão';
+            if (bracketMatches[30].t1 === teamNome || bracketMatches[30].t2 === teamNome) return 'Finalista';
+            if (bracketMatches[28].t1 === teamNome || bracketMatches[28].t2 === teamNome || bracketMatches[29].t1 === teamNome || bracketMatches[29].t2 === teamNome) return 'Semifinalista';
+            for (let i = 24; i <= 27; i++) { if (bracketMatches[i].t1 === teamNome || bracketMatches[i].t2 === teamNome) return 'Quartas de Final'; }
+            for (let i = 16; i <= 23; i++) { if (bracketMatches[i].t1 === teamNome || bracketMatches[i].t2 === teamNome) return 'Oitavas de Final'; }
+            for (let i = 0; i <= 15; i++) { if (bracketMatches[i].t1 === teamNome || bracketMatches[i].t2 === teamNome) return '16-Avos'; }
+            return 'Fase de Grupos';
+        }
+
+        async function salvarBolao() {
+            let campeao = bracketMatches[30].winner;
+            let btn = document.getElementById('btn-salvar-bolao');
+            btn.innerText = "⏳ A guardar...";
+
+            const palpitesClassificacao = [];
+            Object.keys(classificacaoFinalGrupos).forEach(grupo => {
+                classificacaoFinalGrupos[grupo].forEach((time, index) => {
+                    palpitesClassificacao.push({
+                        usuario_id: usuarioLogado.id,
+                        selecao_id: getAbrv(time.nome),
+                        posicao_grupo: index + 1,
+                        fase_maxima_alcancada: calcularFaseMaxima(time.nome)
+                    });
+                });
+            });
+
+            if (supabaseClient) {
+                try {
+                    // 1. Buscar a tabela oficial de jogos para obter os IDs reais
+                    const { data: dbJogos, error: errJogosFetch } = await supabaseClient.from('jogos').select('id, mandante_id, visitante_id');
+                    let jogosMap = {};
+                    if(dbJogos) {
+                        dbJogos.forEach(j => { jogosMap[`${j.mandante_id}-${j.visitante_id}`] = j.id; });
+                    }
+
+                    // 2. Recolher os placares e mapear com o jogo_id
+                    const palpitesJogos = [];
+                    Object.keys(jogosData).forEach(letra => {
+                        [1, 2, 3].forEach(r => {
+                            jogosData[letra][r].forEach((jogo, idx) => {
+                                let inM = document.getElementById(`in-${letra}-r${r}-j${idx}-m`);
+                                let inV = document.getElementById(`in-${letra}-r${r}-j${idx}-v`);
+                                if (inM && inV && inM.value !== "" && inV.value !== "") {
+                                    let mId = getAbrv(jogo.mandante);
+                                    let vId = getAbrv(jogo.visitante);
+                                    
+                                    // Pega o ID real do banco (se existir), ou tenta um número provisório (não recomendado)
+                                    let dbJogoId = jogosMap[`${mId}-${vId}`];
+                                    
+                                    if (dbJogoId) {
+                                        palpitesJogos.push({
+                                            usuario_id: usuarioLogado.id,
+                                            jogo_id: dbJogoId,
+                                            gols_mandante: parseInt(inM.value),
+                                            gols_visitante: parseInt(inV.value)
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    });
+
+                    // Limpar palpites antigos
+                    await supabaseClient.from('palpites_classificacao').delete().eq('usuario_id', usuarioLogado.id);
+                    await supabaseClient.from('palpites_jogos').delete().eq('usuario_id', usuarioLogado.id);
+                    
+                    // Inserir palpites de classificação
+                    const { error: err1 } = await supabaseClient.from('palpites_classificacao').insert(palpitesClassificacao);
+                    if (err1) throw new Error("Erro na classificação: " + err1.message);
+                    
+                    // Inserir palpites de jogos
+                    if (palpitesJogos.length > 0) {
+                        const { error: err2 } = await supabaseClient.from('palpites_jogos').insert(palpitesJogos);
+                        if (err2) throw new Error("Erro nos jogos: " + err2.message);
+                    } else if (Object.keys(jogosMap).length === 0) {
+                        console.warn("Aviso: Nenhum palpite de jogo salvo porque a tabela 'jogos' oficial no Supabase parece estar vazia.");
+                    }
+                    
+                    alert(`🎉 SUCESSO!\n\nOs seus palpites foram guardados no Supabase!\nO seu Grande Campeão é: ${campeao}.`);
+                } catch (err) {
+                    let msg = err.message || JSON.stringify(err);
+                    alert("ERRO AO GUARDAR NO SUPABASE:\n" + msg);
+                    console.error("Erro completo:", err);
+                }
+            } else {
+                alert(`(Modo Offline)\n\nOs seus palpites seriam guardados aqui.\nCampeão: ${campeao}`);
+            }
+            btn.innerText = "🏆 Guardar Bolão no Banco";
+        }
+
+        function gerarPDF() {
+            alert("A preparar o ficheiro. A transferência iniciará em alguns segundos.");
+            let elsToHide = document.querySelectorAll('.pdf-hide');
+            elsToHide.forEach(el => el.style.display = 'none');
+            
+            document.getElementById('tab-grupos').classList.add('show', 'active');
+            Object.keys(gruposData).forEach(letra => {
+                [1, 2, 3].forEach(r => document.getElementById(`pane-${letra}-r${r}`).classList.remove('d-none'));
+            });
+
+            const element = document.getElementById('conteudo-bolao');
+            const opt = {
+                margin:       [0.2, 0.2, 0.2, 0.2],
+                filename:     'Meu_Bolao_Copa_2026.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a3', orientation: 'landscape' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                elsToHide.forEach(el => el.style.display = '');
+                document.getElementById('tab-grupos').classList.remove('show', 'active');
+                mudarRodadaGeral(3); 
+            });
+        }
+    </script>
+</body>
+</html>
