@@ -28,7 +28,9 @@
            ========================================== */
         .login-wrapper {
             min-height: 100vh; display: flex; align-items: center; justify-content: center;
-            background: #000; background-image: linear-gradient(135deg, #000000 20%, #4A00E0 50%, #FF007F 80%, #00E5FF 100%);
+            background: #000; 
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('https://digitalhub.fifa.com/transform/4e4717fc-7f87-4ea4-b989-7f5730ec94ae/General-Graphic-3840-x-2160-8');
+            background-size: cover; background-position: center;
         }
         .login-box {
             background: #fff; padding: 40px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.4);
@@ -109,6 +111,8 @@
         .node-circle:hover { transform: scale(1.1); border-color: #198754; }
         .node-circle.empty-circle { background-color: #f1f3f5; border: 2px solid #ced4da; }
         
+        .eliminated { filter: grayscale(100%); opacity: 0.4; }
+
         .node-abrv { font-weight: 700; color: #444; font-size: 0.85rem; letter-spacing: 0.5px; width: 35px; text-align: center; }
 
         .center-final { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 30px; min-width: 260px; }
@@ -123,9 +127,9 @@
 <body>
 
     <div id="tela-login" class="login-wrapper">
-        <div class="login-box">
-            <h2 class="fw-bold mb-1">⚽ BOLÃO <span style="color: #4A00E0;">2026</span></h2>
-            <p class="text-muted small mb-4">Inicie sessão para simular e guardar os seus palpites</p>
+        <div class="login-box" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+            <img src="https://www.ogol.com.br/img/logos/edicoes/176026_imgbank_.png" alt="Logo Copa 2026" style="max-height: 110px; margin-bottom: 15px;">
+            <p class="text-muted small mb-4 fw-bold" id="texto-auth-desc">Inicie sessão para simular e guardar os seus palpites</p>
             
             <form id="form-login">
                 <div class="mb-3 text-start d-none" id="container-nome">
@@ -154,34 +158,143 @@
     <!-- TELA DASHBOARD -->
     <div id="tela-dashboard" style="display: none; min-height: 100vh; background-color: #f4f7f6; padding: 40px 0;">
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-5">
-                <h2 class="fw-bold mb-0">⚽ Menu Principal</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">🔥 A Copa Começou!</h2>
                 <div>
                     <span class="text-muted me-3">Olá, <strong id="dash-usuario-nome" style="color: #4A00E0;">Visitante</strong>!</span>
                     <button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold" onclick="fazerLogout()">Sair</button>
                 </div>
             </div>
 
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="dash-card" onclick="abrirTela('conteudo-bolao')">
-                        <div class="dash-icon">📝</div>
-                        <h4 class="dash-title">Meus Palpites</h4>
-                        <p class="dash-desc">Preencha os resultados, simule o mata-mata e escolha o seu campeão.</p>
+            <!-- Top Metrics -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100" style="background: linear-gradient(135deg, #4A00E0, #8E2DE2); color: white;">
+                        <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h5 class="opacity-75 mb-1">A Minha Pontuação</h5>
+                                <h1 class="display-4 fw-bold mb-0" id="dash-my-score">0 <span class="fs-4 opacity-75">pts</span></h1>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="opacity-75 mb-1">Posição</h5>
+                                <h1 class="display-4 fw-bold mb-0" id="dash-my-pos">--</h1>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="dash-card" onclick="abrirRanking()">
-                        <div class="dash-icon">🏆</div>
-                        <h4 class="dash-title">Ranking Geral</h4>
-                        <p class="dash-desc">Veja a classificação e as escolhas de todos os participantes.</p>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white;">
+                        <div class="card-body p-4">
+                            <h5 class="opacity-75 mb-2">💰 Premiação (R$ 30 / Pessoa)</h5>
+                            <div class="row text-center mt-3">
+                                <div class="col-4 border-end border-light border-opacity-25">
+                                    <div class="small fw-bold text-uppercase opacity-75">1º Lugar (60%)</div>
+                                    <div class="fs-4 fw-bold" id="dash-premio-1">R$ 0</div>
+                                </div>
+                                <div class="col-4 border-end border-light border-opacity-25">
+                                    <div class="small fw-bold text-uppercase opacity-75">2º Lugar (25%)</div>
+                                    <div class="fs-4 fw-bold" id="dash-premio-2">R$ 0</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="small fw-bold text-uppercase opacity-75">3º Lugar (15%)</div>
+                                    <div class="fs-4 fw-bold" id="dash-premio-3">R$ 0</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="dash-card" onclick="abrirAcompanhamento()">
-                        <div class="dash-icon">🌍</div>
-                        <h4 class="dash-title">Acompanhamento</h4>
-                        <p class="dash-desc">Confira os resultados reais da Copa (Disponível em 2026).</p>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <!-- Jogos de Hoje -->
+                <div class="col-md-7">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">📅 Últimos e Próximos Jogos</h5>
+                            <button class="btn btn-sm btn-light rounded-pill fw-bold" onclick="abrirTela('tela-todos-jogos')">Ver Todos</button>
+                        </div>
+                        <div class="card-body p-4" id="dash-jogos-hoje">
+                            <div class="text-center py-4 text-muted">⏳ A carregar jogos...</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Ranking Top 5 -->
+                <div class="col-md-5">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">🏆 Ranking Top 5</h5>
+                            <button class="btn btn-sm btn-light rounded-pill fw-bold" onclick="abrirRanking()">Ver Completo</button>
+                        </div>
+                        <div class="card-body p-0 mt-3">
+                            <table class="table table-hover mb-0 align-middle text-center">
+                                <tbody id="dash-ranking-top5">
+                                    <tr><td class="py-4 text-muted">⏳ A carregar ranking...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="fw-bold mb-3">🌍 Classificação Real dos Grupos</h5>
+                    <div id="dash-grupos-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+                        <div class="carousel-inner" id="dash-grupos-inner" style="padding: 10px 40px;">
+                            <div class="carousel-item active"><div class="text-center py-4 text-muted">A carregar classificação...</div></div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#dash-grupos-carousel" data-bs-slide="prev" style="width: 40px; filter: invert(100%);">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#dash-grupos-carousel" data-bs-slide="next" style="width: 40px; filter: invert(100%);">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Próximo</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação Rápida -->
+            <h5 class="fw-bold mb-3">Navegação Rápida</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <button class="btn btn-dark w-100 py-3 rounded-4 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="abrirTela('conteudo-bolao')">
+                        <span class="fs-4 me-2">📝</span> O Meu Bolão
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-dark w-100 py-3 rounded-4 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="abrirTela('tela-todos-jogos')">
+                        <span class="fs-4 me-2">📊</span> Palpites da Galera
+                    </button>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-dark w-100 py-3 rounded-4 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="abrirTela('tela-todos-brackets')">
+                        <span class="fs-4 me-2">⚔️</span> Chaveamentos de Todos
+                    </button>
+                </div>
+                <div class="col-md-3 d-none" id="btn-admin-panel">
+                    <button class="btn btn-danger w-100 py-3 rounded-4 fw-bold shadow-sm d-flex align-items-center justify-content-center" onclick="abrirAdminPanel()">
+                        <span class="fs-4 me-2">⚙️</span> Gerir Resultados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA ADMIN -->
+    <div id="tela-admin" style="display: none; min-height: 100vh; padding: 40px 0; background: #f8f9fa;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0 text-danger">⚙️ Gerir Resultados (Admin)</h2>
+                <button class="btn btn-dark rounded-pill fw-bold" onclick="voltarAoMenu()">⬅️ Voltar</button>
+            </div>
+            
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body">
+                    <p class="text-muted small mb-3">Insira os resultados oficiais. Isto atualizará a tabela 'jogos' no Supabase e recalculará os pontos de todos os jogadores.</p>
+                    <div id="admin-jogos-lista">
+                        <div class="text-center py-5 text-muted">A carregar jogos da base de dados...</div>
                     </div>
                 </div>
             </div>
@@ -189,7 +302,7 @@
     </div>
 
     <!-- TELA RANKING -->
-    <div id="tela-ranking" style="display: none; min-height: 100vh; background-color: #f4f7f6; padding: 40px 0;">
+    <div id="tela-ranking" style="display: none; min-height: 100vh; padding: 40px 0;">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="fw-bold mb-0">🏆 Ranking Geral</h2>
@@ -216,7 +329,7 @@
     </div>
 
     <!-- TELA ACOMPANHAMENTO -->
-    <div id="tela-acompanhamento" style="display: none; min-height: 100vh; background-color: #f4f7f6; padding: 40px 0;">
+    <div id="tela-acompanhamento" style="display: none; min-height: 100vh; padding: 40px 0;">
         <div class="container text-center">
             <div class="d-flex justify-content-between align-items-center mb-5 text-start">
                 <h2 class="fw-bold mb-0">🌍 Acompanhamento Oficial</h2>
@@ -232,6 +345,41 @@
         </div>
     </div>
 
+    <!-- TELA TODOS OS JOGOS E PALPITES -->
+    <div id="tela-todos-jogos" style="display: none; min-height: 100vh; padding: 40px 0; background-color: #f8f9fa;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">📊 Todos os Jogos e Palpites</h2>
+                <button class="btn btn-dark rounded-pill fw-bold shadow-sm" onclick="voltarAoMenu()">⬅️ Voltar</button>
+            </div>
+            <div id="lista-todos-jogos-palpites">
+                <div class="text-center py-5 text-muted">⏳ A carregar os dados...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA TODOS OS BRACKETS -->
+    <div id="tela-todos-brackets" style="display: none; min-height: 100vh; padding: 40px 0; background-color: #f8f9fa;">
+        <div class="container text-center">
+            <div class="d-flex justify-content-between align-items-center mb-4 text-start">
+                <h2 class="fw-bold mb-0">⚔️ Chaveamentos da Galera</h2>
+                <button class="btn btn-dark rounded-pill fw-bold shadow-sm" onclick="voltarAoMenu()">⬅️ Voltar</button>
+            </div>
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4 d-flex align-items-center justify-content-center">
+                    <h5 class="mb-0 me-3 fw-bold">Ver Mata-Mata de:</h5>
+                    <select id="select-bracket-user" class="form-select form-select-lg w-auto fw-bold" onchange="renderizarBracketAlheio(this.value)">
+                        <option value="">Selecione um participante...</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="bracket-alheio-container" class="bracket-wrapper text-start" style="display: none; pointer-events: none; transform: scale(0.85); transform-origin: top center;">
+                <!-- Bracket will be injected here -->
+            </div>
+        </div>
+    </div>
+
     <div id="conteudo-bolao" style="display: none;">
         
         <header class="header-bg text-white text-center py-4 mb-4 shadow pdf-hide">
@@ -240,7 +388,8 @@
                     <button id="btn-editar-palpites" class="btn btn-sm btn-warning fw-bold shadow-sm rounded-pill px-2 px-md-3 mb-1 mb-md-0 d-none" onclick="ativarModoLeitura(false)">✏️ Editar</button>
                     <button class="btn btn-sm btn-light fw-bold shadow-sm rounded-pill px-2 px-md-3 text-dark" onclick="voltarAoMenu()">⬅️ Menu</button>
                 </div>
-                <h1 class="display-6 fw-bold mb-1 mt-4 mt-md-0">🏆 Bolão Copa 2026</h1>
+                <img src="https://www.ogol.com.br/img/logos/edicoes/176026_imgbank_.png" alt="Copa 2026" style="height: 70px;" class="mb-2 mt-4 mt-md-0">
+                <h1 class="display-6 fw-bold mb-1">🏆 Bolão Copa 2026</h1>
                 <p class="mb-0 fw-bold">O Palpite de Cristal: Fase de Grupos e Chaveamento</p>
             </div>
         </header>
@@ -289,20 +438,582 @@
 
 
 <script>
+const fifaRanking = {
+  "França (FRA)": 1,
+  "Espanha (ESP)": 2,
+  "Argentina (ARG)": 3,
+  "Inglaterra (ENG)": 4,
+  "Portugal (POR)": 5,
+  "Brasil (BRA)": 6,
+  "Países Baixos (NED)": 7,
+  "Marrocos (MAR)": 8,
+  "Bélgica (BEL)": 9,
+  "Alemanha (GER)": 10,
+  "Croácia (CRO)": 11,
+  "Colômbia (COL)": 13,
+  "Senegal (SEN)": 14,
+  "México (MEX)": 15,
+  "EUA (USA)": 16,
+  "Uruguai (URU)": 17,
+  "Japão (JPN)": 18,
+  "Suíça (SUI)": 19,
+  "IR Irã (IRN)": 21,
+  "Turquia (TUR)": 22,
+  "Áustria (AUT)": 23,
+  "Equador (ECU)": 24,
+  "Coreia do Sul (KOR)": 25,
+  "Austrália (AUS)": 27,
+  "Egito (EGY)": 28,
+  "Argélia (ALG)": 29,
+  "Canadá (CAN)": 30,
+  "Noruega (NOR)": 31,
+  "Panamá (PAN)": 33,
+  "Costa do Marfim (CIV)": 34,
+  "Suécia (SWE)": 38,
+  "Paraguai (PAR)": 40,
+  "Czechia (CZE)": 41,
+  "Escócia (SCO)": 43,
+  "Tunísia (TUN)": 45,
+  "República Democrática do Congo (COD)": 46,
+  "Usbequistão (UZB)": 50,
+  "Catar (QAT)": 55,
+  "Iraque (IRQ)": 57,
+  "África do Sul (RSA)": 60,
+  "Arábia Saudita (KSA)": 61,
+  "Jordânia (JOR)": 63,
+  "Bósnia e Herzegovina (BIH)": 65,
+  "Cabo Verde (CPV)": 68,
+  "Gana (GHA)": 73,
+  "Haiti (HAI)": 82,
+  "Curaçao (CUW)": 83,
+  "Nova Zelândia (NZL)": 85
+};
+
+const fifaPermutations = [
+  "E,J,I,F,H,G,L,K",
+  "H,G,I,D,J,F,L,K",
+  "E,J,I,D,H,G,L,K",
+  "E,J,I,D,H,F,L,K",
+  "E,G,I,D,J,F,L,K",
+  "E,G,J,D,H,F,L,K",
+  "E,G,I,D,H,F,L,K",
+  "E,G,J,D,H,F,L,I",
+  "E,G,J,D,H,F,I,K",
+  "H,G,I,C,J,F,L,K",
+  "E,J,I,C,H,G,L,K",
+  "E,J,I,C,H,F,L,K",
+  "E,G,I,C,J,F,L,K",
+  "E,G,J,C,H,F,L,K",
+  "E,G,I,C,H,F,L,K",
+  "E,G,J,C,H,F,L,I",
+  "E,G,J,C,H,F,I,K",
+  "H,G,I,C,J,D,L,K",
+  "C,J,I,D,H,F,L,K",
+  "C,G,I,D,J,F,L,K",
+  "C,G,J,D,H,F,L,K",
+  "C,G,I,D,H,F,L,K",
+  "C,G,J,D,H,F,L,I",
+  "C,G,J,D,H,F,I,K",
+  "E,J,I,C,H,D,L,K",
+  "E,G,I,C,J,D,L,K",
+  "E,G,J,C,H,D,L,K",
+  "E,G,I,C,H,D,L,K",
+  "E,G,J,C,H,D,L,I",
+  "E,G,J,C,H,D,I,K",
+  "C,J,E,D,I,F,L,K",
+  "C,J,E,D,H,F,L,K",
+  "C,E,I,D,H,F,L,K",
+  "C,J,E,D,H,F,L,I",
+  "C,J,E,D,H,F,I,K",
+  "C,G,E,D,J,F,L,K",
+  "C,G,E,D,I,F,L,K",
+  "C,G,E,D,J,F,L,I",
+  "C,G,E,D,J,F,I,K",
+  "C,G,E,D,H,F,L,K",
+  "C,G,J,D,H,F,L,E",
+  "C,G,J,D,H,F,E,K",
+  "C,G,E,D,H,F,L,I",
+  "C,G,E,D,H,F,I,K",
+  "C,G,J,D,H,F,E,I",
+  "H,J,B,F,I,G,L,K",
+  "E,J,I,B,H,G,L,K",
+  "E,J,B,F,I,H,L,K",
+  "E,J,B,F,I,G,L,K",
+  "E,J,B,F,H,G,L,K",
+  "E,G,B,F,I,H,L,K",
+  "E,J,B,F,H,G,L,I",
+  "E,J,B,F,H,G,I,K",
+  "H,J,B,D,I,G,L,K",
+  "H,J,B,D,I,F,L,K",
+  "I,G,B,D,J,F,L,K",
+  "H,G,B,D,J,F,L,K",
+  "H,G,B,D,I,F,L,K",
+  "H,G,B,D,J,F,L,I",
+  "H,G,B,D,J,F,I,K",
+  "E,J,B,D,I,H,L,K",
+  "E,J,B,D,I,G,L,K",
+  "E,J,B,D,H,G,L,K",
+  "E,G,B,D,I,H,L,K",
+  "E,J,B,D,H,G,L,I",
+  "E,J,B,D,H,G,I,K",
+  "E,J,B,D,I,F,L,K",
+  "E,J,B,D,H,F,L,K",
+  "E,I,B,D,H,F,L,K",
+  "E,J,B,D,H,F,L,I",
+  "E,J,B,D,H,F,I,K",
+  "E,G,B,D,J,F,L,K",
+  "E,G,B,D,I,F,L,K",
+  "E,G,B,D,J,F,L,I",
+  "E,G,B,D,J,F,I,K",
+  "E,G,B,D,H,F,L,K",
+  "H,G,B,D,J,F,L,E",
+  "H,G,B,D,J,F,E,K",
+  "E,G,B,D,H,F,L,I",
+  "E,G,B,D,H,F,I,K",
+  "H,G,B,D,J,F,E,I",
+  "H,J,B,C,I,G,L,K",
+  "H,J,B,C,I,F,L,K",
+  "I,G,B,C,J,F,L,K",
+  "H,G,B,C,J,F,L,K",
+  "H,G,B,C,I,F,L,K",
+  "H,G,B,C,J,F,L,I",
+  "H,G,B,C,J,F,I,K",
+  "E,J,B,C,I,H,L,K",
+  "E,J,B,C,I,G,L,K",
+  "E,J,B,C,H,G,L,K",
+  "E,G,B,C,I,H,L,K",
+  "E,J,B,C,H,G,L,I",
+  "E,J,B,C,H,G,I,K",
+  "E,J,B,C,I,F,L,K",
+  "E,J,B,C,H,F,L,K",
+  "E,I,B,C,H,F,L,K",
+  "E,J,B,C,H,F,L,I",
+  "E,J,B,C,H,F,I,K",
+  "E,G,B,C,J,F,L,K",
+  "E,G,B,C,I,F,L,K",
+  "E,G,B,C,J,F,L,I",
+  "E,G,B,C,J,F,I,K",
+  "E,G,B,C,H,F,L,K",
+  "H,G,B,C,J,F,L,E",
+  "H,G,B,C,J,F,E,K",
+  "E,G,B,C,H,F,L,I",
+  "E,G,B,C,H,F,I,K",
+  "H,G,B,C,J,F,E,I",
+  "H,J,B,C,I,D,L,K",
+  "I,G,B,C,J,D,L,K",
+  "H,G,B,C,J,D,L,K",
+  "H,G,B,C,I,D,L,K",
+  "H,G,B,C,J,D,L,I",
+  "H,G,B,C,J,D,I,K",
+  "C,J,B,D,I,F,L,K",
+  "C,J,B,D,H,F,L,K",
+  "C,I,B,D,H,F,L,K",
+  "C,J,B,D,H,F,L,I",
+  "C,J,B,D,H,F,I,K",
+  "C,G,B,D,J,F,L,K",
+  "C,G,B,D,I,F,L,K",
+  "C,G,B,D,J,F,L,I",
+  "C,G,B,D,J,F,I,K",
+  "C,G,B,D,H,F,L,K",
+  "C,G,B,D,H,F,L,J",
+  "H,G,B,C,J,F,D,K",
+  "C,G,B,D,H,F,L,I",
+  "C,G,B,D,H,F,I,K",
+  "H,G,B,C,J,F,D,I",
+  "E,J,B,C,I,D,L,K",
+  "E,J,B,C,H,D,L,K",
+  "E,I,B,C,H,D,L,K",
+  "E,J,B,C,H,D,L,I",
+  "E,J,B,C,H,D,I,K",
+  "E,G,B,C,J,D,L,K",
+  "E,G,B,C,I,D,L,K",
+  "E,G,B,C,J,D,L,I",
+  "E,G,B,C,J,D,I,K",
+  "E,G,B,C,H,D,L,K",
+  "H,G,B,C,J,D,L,E",
+  "H,G,B,C,J,D,E,K",
+  "E,G,B,C,H,D,L,I",
+  "E,G,B,C,H,D,I,K",
+  "H,G,B,C,J,D,E,I",
+  "C,J,B,D,E,F,L,K",
+  "C,E,B,D,I,F,L,K",
+  "C,J,B,D,E,F,L,I",
+  "C,J,B,D,E,F,I,K",
+  "C,E,B,D,H,F,L,K",
+  "C,J,B,D,H,F,L,E",
+  "C,J,B,D,H,F,E,K",
+  "C,E,B,D,H,F,L,I",
+  "C,E,B,D,H,F,I,K",
+  "C,J,B,D,H,F,E,I",
+  "C,G,B,D,E,F,L,K",
+  "C,G,B,D,J,F,L,E",
+  "C,G,B,D,J,F,E,K",
+  "C,G,B,D,E,F,L,I",
+  "C,G,B,D,E,F,I,K",
+  "C,G,B,D,J,F,E,I",
+  "C,G,B,D,H,F,L,E",
+  "C,G,B,D,H,F,E,K",
+  "H,G,B,C,J,F,D,E",
+  "C,G,B,D,H,F,E,I",
+  "H,J,I,F,A,G,L,K",
+  "E,J,I,A,H,G,L,K",
+  "E,J,I,F,A,H,L,K",
+  "E,J,I,F,A,G,L,K",
+  "E,G,J,F,A,H,L,K",
+  "E,G,I,F,A,H,L,K",
+  "E,G,J,F,A,H,L,I",
+  "E,G,J,F,A,H,I,K",
+  "H,J,I,D,A,G,L,K",
+  "H,J,I,D,A,F,L,K",
+  "I,G,J,D,A,F,L,K",
+  "H,G,J,D,A,F,L,K",
+  "H,G,I,D,A,F,L,K",
+  "H,G,J,D,A,F,L,I",
+  "H,G,J,D,A,F,I,K",
+  "E,J,I,D,A,H,L,K",
+  "E,J,I,D,A,G,L,K",
+  "E,G,J,D,A,H,L,K",
+  "E,G,I,D,A,H,L,K",
+  "E,G,J,D,A,H,L,I",
+  "E,G,J,D,A,H,I,K",
+  "E,J,I,D,A,F,L,K",
+  "H,J,E,D,A,F,L,K",
+  "H,E,I,D,A,F,L,K",
+  "H,J,E,D,A,F,L,I",
+  "H,J,E,D,A,F,I,K",
+  "E,G,J,D,A,F,L,K",
+  "E,G,I,D,A,F,L,K",
+  "E,G,J,D,A,F,L,I",
+  "E,G,J,D,A,F,I,K",
+  "H,G,E,D,A,F,L,K",
+  "H,G,J,D,A,F,L,E",
+  "H,G,J,D,A,F,E,K",
+  "H,G,E,D,A,F,L,I",
+  "H,G,E,D,A,F,I,K",
+  "H,G,J,D,A,F,E,I",
+  "H,J,I,C,A,G,L,K",
+  "H,J,I,C,A,F,L,K",
+  "I,G,J,C,A,F,L,K",
+  "H,G,J,C,A,F,L,K",
+  "H,G,I,C,A,F,L,K",
+  "H,G,J,C,A,F,L,I",
+  "H,G,J,C,A,F,I,K",
+  "E,J,I,C,A,H,L,K",
+  "E,J,I,C,A,G,L,K",
+  "E,G,J,C,A,H,L,K",
+  "E,G,I,C,A,H,L,K",
+  "E,G,J,C,A,H,L,I",
+  "E,G,J,C,A,H,I,K",
+  "E,J,I,C,A,F,L,K",
+  "H,J,E,C,A,F,L,K",
+  "H,E,I,C,A,F,L,K",
+  "H,J,E,C,A,F,L,I",
+  "H,J,E,C,A,F,I,K",
+  "E,G,J,C,A,F,L,K",
+  "E,G,I,C,A,F,L,K",
+  "E,G,J,C,A,F,L,I",
+  "E,G,J,C,A,F,I,K",
+  "H,G,E,C,A,F,L,K",
+  "H,G,J,C,A,F,L,E",
+  "H,G,J,C,A,F,E,K",
+  "H,G,E,C,A,F,L,I",
+  "H,G,E,C,A,F,I,K",
+  "H,G,J,C,A,F,E,I",
+  "H,J,I,C,A,D,L,K",
+  "I,G,J,C,A,D,L,K",
+  "H,G,J,C,A,D,L,K",
+  "H,G,I,C,A,D,L,K",
+  "H,G,J,C,A,D,L,I",
+  "H,G,J,C,A,D,I,K",
+  "C,J,I,D,A,F,L,K",
+  "H,J,F,C,A,D,L,K",
+  "H,F,I,C,A,D,L,K",
+  "H,J,F,C,A,D,L,I",
+  "H,J,F,C,A,D,I,K",
+  "C,G,J,D,A,F,L,K",
+  "C,G,I,D,A,F,L,K",
+  "C,G,J,D,A,F,L,I",
+  "C,G,J,D,A,F,I,K",
+  "H,G,F,C,A,D,L,K",
+  "C,G,J,D,A,F,L,H",
+  "H,G,J,C,A,F,D,K",
+  "H,G,F,C,A,D,L,I",
+  "H,G,F,C,A,D,I,K",
+  "H,G,J,C,A,F,D,I",
+  "E,J,I,C,A,D,L,K",
+  "H,J,E,C,A,D,L,K",
+  "H,E,I,C,A,D,L,K",
+  "H,J,E,C,A,D,L,I",
+  "H,J,E,C,A,D,I,K",
+  "E,G,J,C,A,D,L,K",
+  "E,G,I,C,A,D,L,K",
+  "E,G,J,C,A,D,L,I",
+  "E,G,J,C,A,D,I,K",
+  "H,G,E,C,A,D,L,K",
+  "H,G,J,C,A,D,L,E",
+  "H,G,J,C,A,D,E,K",
+  "H,G,E,C,A,D,L,I",
+  "H,G,E,C,A,D,I,K",
+  "H,G,J,C,A,D,E,I",
+  "C,J,E,D,A,F,L,K",
+  "C,E,I,D,A,F,L,K",
+  "C,J,E,D,A,F,L,I",
+  "C,J,E,D,A,F,I,K",
+  "H,E,F,C,A,D,L,K",
+  "H,J,F,C,A,D,L,E",
+  "H,J,E,C,A,F,D,K",
+  "H,E,F,C,A,D,L,I",
+  "H,E,F,C,A,D,I,K",
+  "H,J,E,C,A,F,D,I",
+  "C,G,E,D,A,F,L,K",
+  "C,G,J,D,A,F,L,E",
+  "C,G,J,D,A,F,E,K",
+  "C,G,E,D,A,F,L,I",
+  "C,G,E,D,A,F,I,K",
+  "C,G,J,D,A,F,E,I",
+  "H,G,F,C,A,D,L,E",
+  "H,G,E,C,A,F,D,K",
+  "H,G,J,C,A,F,D,E",
+  "H,G,E,C,A,F,D,I",
+  "H,J,B,A,I,G,L,K",
+  "H,J,B,A,I,F,L,K",
+  "I,J,B,F,A,G,L,K",
+  "H,J,B,F,A,G,L,K",
+  "H,G,B,A,I,F,L,K",
+  "H,J,B,F,A,G,L,I",
+  "H,J,B,F,A,G,I,K",
+  "E,J,B,A,I,H,L,K",
+  "E,J,B,A,I,G,L,K",
+  "E,J,B,A,H,G,L,K",
+  "E,G,B,A,I,H,L,K",
+  "E,J,B,A,H,G,L,I",
+  "E,J,B,A,H,G,I,K",
+  "E,J,B,A,I,F,L,K",
+  "E,J,B,F,A,H,L,K",
+  "E,I,B,F,A,H,L,K",
+  "E,J,B,F,A,H,L,I",
+  "E,J,B,F,A,H,I,K",
+  "E,J,B,F,A,G,L,K",
+  "E,G,B,A,I,F,L,K",
+  "E,J,B,F,A,G,L,I",
+  "E,J,B,F,A,G,I,K",
+  "E,G,B,F,A,H,L,K",
+  "H,J,B,F,A,G,L,E",
+  "H,J,B,F,A,G,E,K",
+  "E,G,B,F,A,H,L,I",
+  "E,G,B,F,A,H,I,K",
+  "H,J,B,F,A,G,E,I",
+  "I,J,B,D,A,H,L,K",
+  "I,J,B,D,A,G,L,K",
+  "H,J,B,D,A,G,L,K",
+  "I,G,B,D,A,H,L,K",
+  "H,J,B,D,A,G,L,I",
+  "H,J,B,D,A,G,I,K",
+  "I,J,B,D,A,F,L,K",
+  "H,J,B,D,A,F,L,K",
+  "H,I,B,D,A,F,L,K",
+  "H,J,B,D,A,F,L,I",
+  "H,J,B,D,A,F,I,K",
+  "F,J,B,D,A,G,L,K",
+  "I,G,B,D,A,F,L,K",
+  "F,J,B,D,A,G,L,I",
+  "F,J,B,D,A,G,I,K",
+  "H,G,B,D,A,F,L,K",
+  "H,G,B,D,A,F,L,J",
+  "H,G,B,D,A,F,J,K",
+  "H,G,B,D,A,F,L,I",
+  "H,G,B,D,A,F,I,K",
+  "H,G,B,D,A,F,I,J",
+  "E,J,B,A,I,D,L,K",
+  "E,J,B,D,A,H,L,K",
+  "E,I,B,D,A,H,L,K",
+  "E,J,B,D,A,H,L,I",
+  "E,J,B,D,A,H,I,K",
+  "E,J,B,D,A,G,L,K",
+  "E,G,B,A,I,D,L,K",
+  "E,J,B,D,A,G,L,I",
+  "E,J,B,D,A,G,I,K",
+  "E,G,B,D,A,H,L,K",
+  "H,J,B,D,A,G,L,E",
+  "H,J,B,D,A,G,E,K",
+  "E,G,B,D,A,H,L,I",
+  "E,G,B,D,A,H,I,K",
+  "H,J,B,D,A,G,E,I",
+  "E,J,B,D,A,F,L,K",
+  "E,I,B,D,A,F,L,K",
+  "E,J,B,D,A,F,L,I",
+  "E,J,B,D,A,F,I,K",
+  "H,E,B,D,A,F,L,K",
+  "H,J,B,D,A,F,L,E",
+  "H,J,B,D,A,F,E,K",
+  "H,E,B,D,A,F,L,I",
+  "H,E,B,D,A,F,I,K",
+  "H,J,B,D,A,F,E,I",
+  "E,G,B,D,A,F,L,K",
+  "E,G,B,D,A,F,L,J",
+  "E,G,B,D,A,F,J,K",
+  "E,G,B,D,A,F,L,I",
+  "E,G,B,D,A,F,I,K",
+  "E,G,B,D,A,F,I,J",
+  "H,G,B,D,A,F,L,E",
+  "H,G,B,D,A,F,E,K",
+  "H,G,B,D,A,F,E,J",
+  "H,G,B,D,A,F,E,I",
+  "I,J,B,C,A,H,L,K",
+  "I,J,B,C,A,G,L,K",
+  "H,J,B,C,A,G,L,K",
+  "I,G,B,C,A,H,L,K",
+  "H,J,B,C,A,G,L,I",
+  "H,J,B,C,A,G,I,K",
+  "I,J,B,C,A,F,L,K",
+  "H,J,B,C,A,F,L,K",
+  "H,I,B,C,A,F,L,K",
+  "H,J,B,C,A,F,L,I",
+  "H,J,B,C,A,F,I,K",
+  "C,J,B,F,A,G,L,K",
+  "I,G,B,C,A,F,L,K",
+  "C,J,B,F,A,G,L,I",
+  "C,J,B,F,A,G,I,K",
+  "H,G,B,C,A,F,L,K",
+  "H,G,B,C,A,F,L,J",
+  "H,G,B,C,A,F,J,K",
+  "H,G,B,C,A,F,L,I",
+  "H,G,B,C,A,F,I,K",
+  "H,G,B,C,A,F,I,J",
+  "E,J,B,A,I,C,L,K",
+  "E,J,B,C,A,H,L,K",
+  "E,I,B,C,A,H,L,K",
+  "E,J,B,C,A,H,L,I",
+  "E,J,B,C,A,H,I,K",
+  "E,J,B,C,A,G,L,K",
+  "E,G,B,A,I,C,L,K",
+  "E,J,B,C,A,G,L,I",
+  "E,J,B,C,A,G,I,K",
+  "E,G,B,C,A,H,L,K",
+  "H,J,B,C,A,G,L,E",
+  "H,J,B,C,A,G,E,K",
+  "E,G,B,C,A,H,L,I",
+  "E,G,B,C,A,H,I,K",
+  "H,J,B,C,A,G,E,I",
+  "E,J,B,C,A,F,L,K",
+  "E,I,B,C,A,F,L,K",
+  "E,J,B,C,A,F,L,I",
+  "E,J,B,C,A,F,I,K",
+  "H,E,B,C,A,F,L,K",
+  "H,J,B,C,A,F,L,E",
+  "H,J,B,C,A,F,E,K",
+  "H,E,B,C,A,F,L,I",
+  "H,E,B,C,A,F,I,K",
+  "H,J,B,C,A,F,E,I",
+  "E,G,B,C,A,F,L,K",
+  "E,G,B,C,A,F,L,J",
+  "E,G,B,C,A,F,J,K",
+  "E,G,B,C,A,F,L,I",
+  "E,G,B,C,A,F,I,K",
+  "E,G,B,C,A,F,I,J",
+  "H,G,B,C,A,F,L,E",
+  "H,G,B,C,A,F,E,K",
+  "H,G,B,C,A,F,E,J",
+  "H,G,B,C,A,F,E,I",
+  "I,J,B,C,A,D,L,K",
+  "H,J,B,C,A,D,L,K",
+  "H,I,B,C,A,D,L,K",
+  "H,J,B,C,A,D,L,I",
+  "H,J,B,C,A,D,I,K",
+  "C,J,B,D,A,G,L,K",
+  "I,G,B,C,A,D,L,K",
+  "C,J,B,D,A,G,L,I",
+  "C,J,B,D,A,G,I,K",
+  "H,G,B,C,A,D,L,K",
+  "H,G,B,C,A,D,L,J",
+  "H,G,B,C,A,D,J,K",
+  "H,G,B,C,A,D,L,I",
+  "H,G,B,C,A,D,I,K",
+  "H,G,B,C,A,D,I,J",
+  "C,J,B,D,A,F,L,K",
+  "C,I,B,D,A,F,L,K",
+  "C,J,B,D,A,F,L,I",
+  "C,J,B,D,A,F,I,K",
+  "H,F,B,C,A,D,L,K",
+  "C,J,B,D,A,F,L,H",
+  "H,J,B,C,A,F,D,K",
+  "H,F,B,C,A,D,L,I",
+  "H,F,B,C,A,D,I,K",
+  "H,J,B,C,A,F,D,I",
+  "C,G,B,D,A,F,L,K",
+  "C,G,B,D,A,F,L,J",
+  "C,G,B,D,A,F,J,K",
+  "C,G,B,D,A,F,L,I",
+  "C,G,B,D,A,F,I,K",
+  "C,G,B,D,A,F,I,J",
+  "C,G,B,D,A,F,L,H",
+  "H,G,B,C,A,F,D,K",
+  "H,G,B,C,A,F,D,J",
+  "H,G,B,C,A,F,D,I",
+  "E,J,B,C,A,D,L,K",
+  "E,I,B,C,A,D,L,K",
+  "E,J,B,C,A,D,L,I",
+  "E,J,B,C,A,D,I,K",
+  "H,E,B,C,A,D,L,K",
+  "H,J,B,C,A,D,L,E",
+  "H,J,B,C,A,D,E,K",
+  "H,E,B,C,A,D,L,I",
+  "H,E,B,C,A,D,I,K",
+  "H,J,B,C,A,D,E,I",
+  "E,G,B,C,A,D,L,K",
+  "E,G,B,C,A,D,L,J",
+  "E,G,B,C,A,D,J,K",
+  "E,G,B,C,A,D,L,I",
+  "E,G,B,C,A,D,I,K",
+  "E,G,B,C,A,D,I,J",
+  "H,G,B,C,A,D,L,E",
+  "H,G,B,C,A,D,E,K",
+  "H,G,B,C,A,D,E,J",
+  "H,G,B,C,A,D,E,I",
+  "C,E,B,D,A,F,L,K",
+  "C,J,B,D,A,F,L,E",
+  "C,J,B,D,A,F,E,K",
+  "C,E,B,D,A,F,L,I",
+  "C,E,B,D,A,F,I,K",
+  "C,J,B,D,A,F,E,I",
+  "H,F,B,C,A,D,L,E",
+  "H,E,B,C,A,F,D,K",
+  "H,J,B,C,A,F,D,E",
+  "H,E,B,C,A,F,D,I",
+  "C,G,B,D,A,F,L,E",
+  "C,G,B,D,A,F,E,K",
+  "C,G,B,D,A,F,E,J",
+  "C,G,B,D,A,F,E,I",
+  "H,G,B,C,A,F,D,E"
+];
+
+
         // ==========================================
         // 1. LIGAÇÃO AO SUPABASE
         // ==========================================
-        // ATENÇÃO: Substitua pelas suas chaves do Supabase!
         const supabaseUrl = 'https://zhewuwemyyppmgpgudqr.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpoZXd1d2VteXlwcG1ncGd1ZHFyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyODk0NDgsImV4cCI6MjA5NTg2NTQ0OH0.KGIl9nXVqQ1gtQARmL98NmRqHR43XqGvwTaJIVY_9_Q';
         
-        let supabaseClient = null; // Variável renomeada para evitar conflitos!
+        let supabaseClient = null;
 
-        // Usa o objeto global window.supabase para criar o cliente
         if (supabaseUrl && supabaseKey) {
             supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-        } else {
-            console.warn("Supabase não configurado. O sistema usará um 'Mock' (simulação) local para o login.");
+        }
+
+        async function fetchAllSupabase(table, selectQuery = '*') {
+            let allData = [];
+            let limit = 1000;
+            let start = 0;
+            let end = limit - 1;
+            while (true) {
+                const { data, error } = await supabaseClient.from(table).select(selectQuery).range(start, end);
+                if (error || !data || data.length === 0) break;
+                allData = allData.concat(data);
+                if (data.length < limit) break;
+                start += limit;
+                end += limit;
+            }
+            return allData;
         }
 
         let usuarioLogado = null;
@@ -317,6 +1028,7 @@
             isLoginMode = !isLoginMode;
             document.getElementById('container-nome').classList.toggle('d-none', isLoginMode);
             document.getElementById('btn-submit').innerText = isLoginMode ? "ENTRAR NO BOLÃO" : "CRIAR CONTA";
+            document.getElementById('texto-auth-desc').innerText = isLoginMode ? "Inicie sessão para simular e guardar os seus palpites" : "Preencha os seus dados para criar conta";
             document.getElementById('texto-alternar').innerHTML = isLoginMode 
                 ? 'Não tem uma conta? <a href="#" class="fw-bold" style="color: #FF007F; text-decoration: none;" onclick="alternarModoAuth(event)">Criar Registo</a>'
                 : 'Já tem conta? <a href="#" class="fw-bold" style="color: #4A00E0; text-decoration: none;" onclick="alternarModoAuth(event)">Fazer Login</a>';
@@ -342,18 +1054,15 @@
             btn.disabled = true;
 
             if (isLoginMode) {
-                // Fazer Login Nativo
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
                 if (error) {
                     alert("Erro ao entrar: " + error.message);
                 } else {
-                    // Usamos o metadata nativo do Supabase Auth em vez de buscar numa tabela de usuarios externa
                     let nomeUsuario = data.user.user_metadata?.nome || email.split('@')[0];
                     usuarioLogado = { id: data.user.id, email: data.user.email, nome: nomeUsuario };
                     liberarAcesso();
                 }
             } else {
-                // Criar Registo Nativo
                 let nome = document.getElementById('login-nome').value;
                 if (!nome) { alert("Por favor, preencha o seu nome."); btn.disabled = false; btn.innerText = "CRIAR CONTA"; return; }
                 
@@ -365,7 +1074,7 @@
                     alert("Erro ao criar conta: " + error.message);
                 } else {
                     alert(`Conta criada com sucesso, ${nome}! Já pode iniciar sessão.`);
-                    alternarModoAuth(new Event('click')); // Volta para o login
+                    alternarModoAuth(new Event('click'));
                     document.getElementById('login-senha').value = '';
                 }
             }
@@ -376,28 +1085,29 @@
 
         async function liberarAcesso() {
             document.getElementById('dash-usuario-nome').innerText = usuarioLogado.nome;
+            if (usuarioLogado.id === '65ca82e9-b932-409e-ab11-61137861dea1') {
+                let adminBtn = document.getElementById('btn-admin-panel');
+                if(adminBtn) adminBtn.classList.remove('d-none');
+            }
             abrirTela('tela-dashboard');
             await carregarMeusPalpites();
+            await atualizarDashboardAovivo();
         }
 
         let isModoLeitura = false;
 
         function ativarModoLeitura(ativo) {
-            isModoLeitura = ativo;
-            document.querySelectorAll('.placar-input').forEach(inp => inp.disabled = ativo);
+            isModoLeitura = true;
+            document.querySelectorAll('.placar-input').forEach(inp => inp.disabled = true);
             
             let bracketWrapper = document.getElementById('bracket-container');
-            if(ativo) {
-                bracketWrapper.style.pointerEvents = 'none';
-                document.getElementById('btn-editar-palpites').classList.remove('d-none');
-                document.getElementById('btn-salvar-bolao').classList.add('d-none');
-            } else {
-                bracketWrapper.style.pointerEvents = 'auto';
-                document.getElementById('btn-editar-palpites').classList.add('d-none');
-                document.getElementById('btn-salvar-bolao').classList.remove('d-none');
-                // Adicionamos scroll para que o user note onde guardar
-                window.scrollTo(0, document.body.scrollHeight);
-            }
+            if(bracketWrapper) bracketWrapper.style.pointerEvents = 'none';
+            
+            let btnEditar = document.getElementById('btn-editar-palpites');
+            if(btnEditar) btnEditar.classList.add('d-none');
+            
+            let btnSalvar = document.getElementById('btn-salvar-bolao');
+            if(btnSalvar) btnSalvar.classList.add('d-none');
         }
 
         async function carregarMeusPalpites() {
@@ -464,17 +1174,74 @@
                     for(let k=0; k<5; k++) preencherBracketAutomaticamente();
 
                 } else {
-                    ativarModoLeitura(false);
+                    ativarModoLeitura(true);
                 }
             } catch(e) { console.error("Erro ao carregar palpites", e); }
         }
 
         function abrirTela(telaId) {
-            ['tela-login', 'tela-dashboard', 'conteudo-bolao', 'tela-ranking', 'tela-acompanhamento'].forEach(id => {
+            ['tela-login', 'tela-dashboard', 'conteudo-bolao', 'tela-ranking', 'tela-acompanhamento', 'tela-todos-jogos', 'tela-todos-brackets'].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = (id === telaId) ? (id === 'tela-login' ? 'flex' : 'block') : 'none';
             });
             window.scrollTo(0,0);
+            
+            // Lógica ao abrir as novas telas
+            if (telaId === 'tela-todos-jogos') {
+                carregarTodosOsJogosEPalpites();
+            } else if (telaId === 'tela-todos-brackets') {
+                carregarListaDeUsuariosParaBracket();
+            }
+        }
+
+        async function abrirAdminPanel() {
+            if (!usuarioLogado || usuarioLogado.id !== '65ca82e9-b932-409e-ab11-61137861dea1') return;
+            abrirTela('tela-admin');
+            let divLista = document.getElementById('admin-jogos-lista');
+            divLista.innerHTML = '<div class="text-center py-5 text-muted">A carregar jogos...</div>';
+            
+            const { data: todosJogos } = await supabaseClient.from('jogos').select('*').order('data_jogo', { ascending: true });
+            if(todosJogos) {
+                let html = '';
+                todosJogos.forEach(j => {
+                    let mNome = getFullTeamName(j.mandante_id);
+                    let vNome = getFullTeamName(j.visitante_id);
+                    let gm = j.gols_mandante !== null ? j.gols_mandante : '';
+                    let gv = j.gols_visitante !== null ? j.gols_visitante : '';
+                    let d = new Date(j.data_jogo).toLocaleString([], {day: '2-digit', month: '2-digit', hour: '2-digit', minute:'2-digit'});
+                    
+                    html += `
+                    <div class="row align-items-center mb-2 pb-2 border-bottom">
+                        <div class="col-md-3 text-muted small">${d} <br> ${j.fase}</div>
+                        <div class="col-md-3 text-end fw-bold">${mNome} ${getFlagImgHTML(j.mandante_id)}</div>
+                        <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
+                            <input type="number" id="admin-gm-${j.id}" class="form-control text-center mx-1" style="width: 60px;" value="${gm}" placeholder="-">
+                            x
+                            <input type="number" id="admin-gv-${j.id}" class="form-control text-center mx-1" style="width: 60px;" value="${gv}" placeholder="-">
+                        </div>
+                        <div class="col-md-2 text-start fw-bold">${getFlagImgHTML(j.visitante_id)} ${vNome}</div>
+                        <div class="col-md-2 text-end">
+                            <button class="btn btn-sm btn-success fw-bold" onclick="adminSalvarJogo(${j.id})">Salvar</button>
+                        </div>
+                    </div>`;
+                });
+                divLista.innerHTML = html;
+            }
+        }
+
+        async function adminSalvarJogo(jogoId) {
+            let gmStr = document.getElementById(`admin-gm-${jogoId}`).value;
+            let gvStr = document.getElementById(`admin-gv-${jogoId}`).value;
+            let gm = gmStr === '' ? null : parseInt(gmStr);
+            let gv = gvStr === '' ? null : parseInt(gvStr);
+            
+            try {
+                const { error } = await supabaseClient.from('jogos').update({ gols_mandante: gm, gols_visitante: gv }).eq('id', jogoId);
+                if (error) throw error;
+                alert('Resultado salvo com sucesso no banco de dados!');
+            } catch(e) {
+                alert('Erro ao salvar: ' + e.message);
+            }
         }
 
         function voltarAoMenu() {
@@ -484,48 +1251,63 @@
         async function abrirRanking() {
             abrirTela('tela-ranking');
             let tbody = document.getElementById('ranking-body');
-            tbody.innerHTML = '<tr><td colspan="3" class="py-4">⏳ A carregar ranking...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="py-4">⏳ A carregar ranking...</td></tr>';
             
             if(!supabaseClient) {
-                tbody.innerHTML = '<tr><td colspan="3" class="py-4 text-danger">Supabase não configurado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-danger">Supabase não configurado.</td></tr>';
                 return;
             }
             
             try {
-                // Fazer JOIN com a tabela 'usuarios' usando o esquema real do utilizador
+                // Certifique-se de que os pontos já estão calculados
+                if(liveRankingData.length === 0) {
+                    await atualizarDashboardAovivo();
+                }
+
+                // Buscar campeões
                 const { data, error } = await supabaseClient
                     .from('palpites_classificacao')
-                    .select('selecao_id, fase_maxima_alcancada, usuarios(nome)')
+                    .select('usuario_id, selecao_id')
                     .eq('fase_maxima_alcancada', 'Campeão');
                 
-                if (error) throw error;
-                
+                let campeoesMap = {};
+                if(data) {
+                    data.forEach(d => { campeoesMap[d.usuario_id] = d.selecao_id; });
+                }
+
                 let html = '';
-                let pos = 1;
-                
-                if (data && data.length > 0) {
-                    data.forEach(d => {
-                        let medalha = pos === 1 ? '🥇' : (pos === 2 ? '🥈' : (pos === 3 ? '🥉' : pos+'º'));
-                        let nome = (d.usuarios && d.usuarios.nome) ? d.usuarios.nome : 'Participante';
-                        let campeao = d.selecao_id;
+                if (liveRankingData && liveRankingData.length > 0) {
+                    liveRankingData.forEach((r, idx) => {
+                        let medalha = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : idx+1+'º'));
+                        let campeao = campeoesMap[r.uid] || 'Não escolhido';
+                        let flag = campeao !== 'Não escolhido' ? getFlagImgHTML(campeao, true) : '❓';
                         
                         html += `
                             <tr class="ranking-row">
                                 <td class="fw-bold fs-5">${medalha}</td>
-                                <td class="text-start fw-bold" style="color: #4A00E0;">${nome}</td>
-                                <td class="fw-bold">${getFlagImgHTML(campeao, true)} ${campeao}</td>
+                                <td class="text-start fw-bold" style="color: #4A00E0;">${r.nome}</td>
+                                <td class="fw-bold">${r.pts} pts</td>
+                                <td>${flag} <span class="d-none d-md-inline">${campeao}</span></td>
                             </tr>
                         `;
-                        pos++;
                     });
                 }
                 
-                if(html === '') html = '<tr><td colspan="3" class="py-4 text-muted">Ainda não há campeões guardados no sistema.</td></tr>';
+                if(html === '') html = '<tr><td colspan="4" class="py-4 text-muted">Ainda sem pontos calculados.</td></tr>';
+                
+                // Mudar o THEAD para incluir os Pontos
+                document.querySelector('#tela-ranking thead tr').innerHTML = `
+                    <th style="width: 80px;">Pos</th>
+                    <th class="text-start">Participante</th>
+                    <th>Pontos</th>
+                    <th>Campeão</th>
+                `;
+
                 tbody.innerHTML = html;
                 
             } catch (err) {
                 console.error("Erro no ranking:", err);
-                tbody.innerHTML = `<tr><td colspan="3" class="py-4 text-danger">Erro ao carregar o ranking.<br><small>${err.message}</small></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-danger">Erro ao carregar o ranking.<br><small>${err.message}</small></td></tr>`;
             }
         }
 
@@ -630,6 +1412,22 @@
             "Inglaterra": "ING", "Gana": "GAN", "Panamá": "PAN", "Croácia": "CRO"
         };
 
+        const teamColors = {
+            "México": "#006341", "Coreia do Sul": "#C2192D", "República Tcheca": "#D7141A", "África do Sul": "#007749",
+            "Canadá": "#FF0000", "Catar": "#8A1538", "Suíça": "#FF0000", "Bósnia e Herzegovina": "#002395",
+            "Brasil": "#FFDF00", "Haiti": "#00205B", "Escócia": "#001B49", "Marrocos": "#C1272D",
+            "Estados Unidos": "#3C3B6E", "Austrália": "#FFCD00", "Turquia": "#E30A17", "Paraguai": "#D52B1E",
+            "Alemanha": "#000000", "Costa do Marfim": "#F77F00", "Equador": "#FFDD00", "Curaçao": "#002B7F",
+            "Holanda": "#F36C21", "Suécia": "#FECC00", "Tunísia": "#E70013", "Japão": "#000555",
+            "Bélgica": "#E30613", "Irã": "#DA291C", "Nova Zelândia": "#000000", "Egito": "#CE1126",
+            "Espanha": "#AA151B", "Arábia Saudita": "#006C35", "Uruguai": "#0038A8", "Cabo Verde": "#003893",
+            "França": "#002395", "Iraque": "#007A3D", "Noruega": "#BA0C2F", "Senegal": "#00853F",
+            "Argentina": "#43A1D5", "Áustria": "#ED2939", "Jordânia": "#CE1126", "Argélia": "#006233",
+            "Portugal": "#DA291C", "Uzbequistão": "#0099B5", "Colômbia": "#FCD116", "RD Congo": "#007FFF",
+            "Inglaterra": "#CE1126", "Gana": "#000000", "Panamá": "#C8102E", "Croácia": "#FF0000"
+        };
+        function getTeamColor(name) { return teamColors[name] || '#6c757d'; }
+
         function getAbrv(name) { return abrvMap[name] || name.substring(0,3).toUpperCase(); }
         function getFullTeamName(abrv) {
             let nome = Object.keys(abrvMap).find(key => abrvMap[key] === abrv);
@@ -684,15 +1482,26 @@
                 [1, 2, 3].forEach(r => {
                     htmlCard += `<div id="pane-${letra}-r${r}" class="pane-rodada ${r === 1 ? '' : 'd-none'}">`;
                     jogosData[letra][r].forEach((jogo, idx) => {
+                        let abrM = getAbrv(jogo.mandante);
+                        let abrV = getAbrv(jogo.visitante);
+                        let flagM_url = flagsImg[jogo.mandante] || "";
+                        let flagV_url = flagsImg[jogo.visitante] || "";
+                        let imgM = flagM_url ? `<img src="${flagM_url}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" class="ms-1 shadow-sm">` : "";
+                        let imgV = flagV_url ? `<img src="${flagV_url}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" class="me-1 shadow-sm">` : "";
+
                         htmlCard += `
-                            <div class="jogo-row d-flex align-items-center justify-content-between p-2">
-                                <div class="text-end fw-bold text-truncate flex-grow-1 pe-2" style="font-size:0.85rem;">${jogo.mandante}</div>
-                                <div class="d-flex align-items-center">
-                                    <input type="number" class="form-control form-control-sm placar-input" min="0" id="in-${letra}-r${r}-j${idx}-m" oninput="atualizarClassificacao('${letra}')">
-                                    <span class="mx-1 text-muted fw-bold">x</span>
-                                    <input type="number" class="form-control form-control-sm placar-input" min="0" id="in-${letra}-r${r}-j${idx}-v" oninput="atualizarClassificacao('${letra}')">
+                            <div class="jogo-row d-flex align-items-center justify-content-center p-2">
+                                <div class="text-end fw-bold d-flex align-items-center justify-content-end pe-2" style="font-size:0.9rem; width: 75px;">
+                                    <span>${abrM}</span>${imgM}
                                 </div>
-                                <div class="text-start fw-bold text-truncate flex-grow-1 ps-2" style="font-size:0.85rem;">${jogo.visitante}</div>
+                                <div class="d-flex align-items-center">
+                                    <input type="number" class="form-control form-control-sm placar-input mx-1" min="0" id="in-${letra}-r${r}-j${idx}-m" oninput="atualizarClassificacao('${letra}')">
+                                    <span class="text-muted fw-bold">x</span>
+                                    <input type="number" class="form-control form-control-sm placar-input mx-1" min="0" id="in-${letra}-r${r}-j${idx}-v" oninput="atualizarClassificacao('${letra}')">
+                                </div>
+                                <div class="text-start fw-bold d-flex align-items-center justify-content-start ps-2" style="font-size:0.9rem; width: 75px;">
+                                    ${imgV}<span>${abrV}</span>
+                                </div>
                             </div>`;
                     });
                     htmlCard += `</div>`;
@@ -731,11 +1540,13 @@
         function atualizarClassificacao(letra) {
             let stats = {};
             gruposData[letra].forEach(t => { stats[t] = { pts: 0, sg: 0, gp: 0, gc: 0, nome: t, grupo: letra }; });
+            let jogosRealizados = [];
             [1, 2, 3].forEach(r => {
                 jogosData[letra][r].forEach((jogo, idx) => {
                     let inM = document.getElementById(`in-${letra}-r${r}-j${idx}-m`), inV = document.getElementById(`in-${letra}-r${r}-j${idx}-v`);
                     if(inM && inV && inM.value !== "" && inV.value !== "") {
                         let gM = parseInt(inM.value), gV = parseInt(inV.value);
+                        jogosRealizados.push({ m: jogo.mandante, v: jogo.visitante, gm: gM, gv: gV });
                         stats[jogo.mandante].gp += gM; stats[jogo.mandante].gc += gV;
                         stats[jogo.visitante].gp += gV; stats[jogo.visitante].gc += gM;
                         stats[jogo.mandante].sg += (gM - gV); stats[jogo.visitante].sg += (gV - gM);
@@ -746,11 +1557,57 @@
                 });
             });
 
-            let arr = Object.values(stats).sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
-            classificacaoFinalGrupos[letra] = arr;
+            let arr = Object.values(stats);
+            
+            // Agrupar por pontos para Confronto Direto
+            let groups = {};
+            arr.forEach(t => {
+                if(!groups[t.pts]) groups[t.pts] = [];
+                groups[t.pts].push(t);
+            });
+            
+            let sortedArr = [];
+            Object.keys(groups).sort((a,b)=>b-a).forEach(pts => {
+                let tied = groups[pts];
+                if(tied.length === 1) {
+                    sortedArr.push(tied[0]);
+                } else {
+                    let h2hStats = {};
+                    tied.forEach(t => { h2hStats[t.nome] = { pts: 0, sg: 0, gp: 0, time: t }; });
+                    let tiedNames = tied.map(t => t.nome);
+                    jogosRealizados.forEach(j => {
+                        if(tiedNames.includes(j.m) && tiedNames.includes(j.v)) {
+                            h2hStats[j.m].gp += j.gm; h2hStats[j.v].gp += j.gv;
+                            h2hStats[j.m].sg += (j.gm - j.gv); h2hStats[j.v].sg += (j.gv - j.gm);
+                            if(j.gm > j.gv) h2hStats[j.m].pts += 3;
+                            else if(j.gv > j.gm) h2hStats[j.v].pts += 3;
+                            else { h2hStats[j.m].pts += 1; h2hStats[j.v].pts += 1; }
+                        }
+                    });
+                    
+                    let h2hArr = Object.values(h2hStats);
+                    h2hArr.sort((a, b) => {
+                        if (a.pts !== b.pts) return b.pts - a.pts; // H2H Pts
+                        if (a.sg !== b.sg) return b.sg - a.sg;     // H2H SG
+                        if (a.gp !== b.gp) return b.gp - a.gp;     // H2H GP
+                        
+                        // Overall
+                        if (a.time.sg !== b.time.sg) return b.time.sg - a.time.sg;
+                        if (a.time.gp !== b.time.gp) return b.time.gp - a.time.gp;
+                        
+                        // FIFA Ranking (menor é melhor)
+                        let rA = typeof fifaRanking !== 'undefined' && fifaRanking[a.time.nome] ? fifaRanking[a.time.nome] : 999;
+                        let rB = typeof fifaRanking !== 'undefined' && fifaRanking[b.time.nome] ? fifaRanking[b.time.nome] : 999;
+                        return rA - rB;
+                    });
+                    sortedArr.push(...h2hArr.map(x => x.time));
+                }
+            });
+
+            classificacaoFinalGrupos[letra] = sortedArr;
             let tbody = document.getElementById(`tb-${letra}`);
             tbody.innerHTML = "";
-            arr.forEach((time, idx) => {
+            sortedArr.forEach((time, idx) => {
                 let color = idx < 2 ? 'zona-classificacao text-dark' : 'text-muted';
                 tbody.innerHTML += `
                     <tr class="${color}">
@@ -773,7 +1630,14 @@
                 }
             });
             
-            terceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+            terceiros.sort((a, b) => {
+                if (a.pts !== b.pts) return b.pts - a.pts;
+                if (a.sg !== b.sg) return b.sg - a.sg;
+                if (a.gp !== b.gp) return b.gp - a.gp;
+                let rA = typeof fifaRanking !== 'undefined' && fifaRanking[a.nome] ? fifaRanking[a.nome] : 999;
+                let rB = typeof fifaRanking !== 'undefined' && fifaRanking[b.nome] ? fifaRanking[b.nome] : 999;
+                return rA - rB;
+            });
             let classificados = terceiros.slice(0, 8).map(x => x.nome);
             
             Object.keys(classificacaoFinalGrupos).forEach(l => {
@@ -793,31 +1657,77 @@
         }
 
         // --- Mata-Mata ---
-        function iniciarMataMata() {
-            document.getElementById('tab-btn-matamata').disabled = false;
-            document.getElementById('tab-btn-matamata').click();
-
+        function prepararMataMataLogico() {
             let P = {}, S = {}, Terceiros = [];
             Object.keys(classificacaoFinalGrupos).forEach(l => {
                 P[l] = classificacaoFinalGrupos[l][0].nome;
                 S[l] = classificacaoFinalGrupos[l][1].nome;
-                Terceiros.push(classificacaoFinalGrupos[l][2]);
+                Terceiros.push({ letra: l, ...classificacaoFinalGrupos[l][2] });
             });
-            Terceiros.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
-            let T = Terceiros.slice(0, 8).map(x => x.nome);
+            Terceiros.sort((a, b) => {
+                if (a.pts !== b.pts) return b.pts - a.pts;
+                if (a.sg !== b.sg) return b.sg - a.sg;
+                if (a.gp !== b.gp) return b.gp - a.gp;
+                let rA = typeof fifaRanking !== 'undefined' && fifaRanking[a.nome] ? fifaRanking[a.nome] : 999;
+                let rB = typeof fifaRanking !== 'undefined' && fifaRanking[b.nome] ? fifaRanking[b.nome] : 999;
+                return rA - rB;
+            });
+            let melhoresTerceiros = Terceiros.slice(0, 8);
+            
+            let letrasClassificadas = melhoresTerceiros.map(t => t.letra).sort().join(',');
+            let chaveEncontrada = null;
+            if (typeof fifaPermutations !== 'undefined') {
+                chaveEncontrada = fifaPermutations.find(perm => perm.split(',').sort().join(',') === letrasClassificadas);
+            }
+            
+            let tMap = {};
+            if (chaveEncontrada) {
+                let letrasOrdem = chaveEncontrada.split(',');
+                let getEquipaPorLetra = (l) => melhoresTerceiros.find(t => t.letra === l)?.nome || null;
+                tMap[8] = getEquipaPorLetra(letrasOrdem[0]);  // 1A
+                tMap[12] = getEquipaPorLetra(letrasOrdem[1]); // 1B
+                tMap[6] = getEquipaPorLetra(letrasOrdem[2]);  // 1D
+                tMap[0] = getEquipaPorLetra(letrasOrdem[3]);  // 1E
+                tMap[7] = getEquipaPorLetra(letrasOrdem[4]);  // 1G
+                tMap[1] = getEquipaPorLetra(letrasOrdem[5]);  // 1I
+                tMap[13] = getEquipaPorLetra(letrasOrdem[6]); // 1K
+                tMap[9] = getEquipaPorLetra(letrasOrdem[7]);  // 1L
+            } else {
+                let T = melhoresTerceiros.map(x => x.nome);
+                tMap = {0:T[0], 1:T[1], 6:T[2], 7:T[3], 8:T[4], 9:T[5], 12:T[6], 13:T[7]};
+            }
+
+            let getT = (id) => tMap[id];
 
             bracketMatches = bracketMap.map(m => ({ id: m.id, t1: null, t2: null, winner: null, nextMatch: m.next, slotInNext: m.slot }));
 
-            bracketMatches[0].t1 = S['A']; bracketMatches[0].t2 = S['B']; bracketMatches[1].t1 = P['C']; bracketMatches[1].t2 = S['F']; 
-            bracketMatches[2].t1 = P['E']; bracketMatches[2].t2 = T[0];   bracketMatches[3].t1 = P['F']; bracketMatches[3].t2 = S['C']; 
-            bracketMatches[4].t1 = S['E']; bracketMatches[4].t2 = S['I']; bracketMatches[5].t1 = P['I']; bracketMatches[5].t2 = T[1];   
-            bracketMatches[6].t1 = P['A']; bracketMatches[6].t2 = T[2];   bracketMatches[7].t1 = P['L']; bracketMatches[7].t2 = T[3];   
-            bracketMatches[8].t1 = P['G']; bracketMatches[8].t2 = T[4];   bracketMatches[9].t1 = P['D']; bracketMatches[9].t2 = T[5];   
-            bracketMatches[10].t1= P['H']; bracketMatches[10].t2= S['J']; bracketMatches[11].t1= S['K']; bracketMatches[11].t2= S['L'];
-            bracketMatches[12].t1= P['B']; bracketMatches[12].t2= T[6];   bracketMatches[13].t1= S['D']; bracketMatches[13].t2= S['G'];
-            bracketMatches[14].t1= P['J']; bracketMatches[14].t2= S['H']; bracketMatches[15].t1= P['K']; bracketMatches[15].t2= T[7];  
+            // Lado Esquerdo (Top to Bottom): nós 0, 1, 2, 3, 4, 5, 6, 7
+            bracketMatches[0].t1 = P['E']; bracketMatches[0].t2 = getT(0);   // 1E x 3os
+            bracketMatches[1].t1 = P['I']; bracketMatches[1].t2 = getT(1);   // 1I x 3os
+            bracketMatches[2].t1 = S['A']; bracketMatches[2].t2 = S['B']; // 2A x 2B
+            bracketMatches[3].t1 = P['F']; bracketMatches[3].t2 = S['C']; // 1F x 2C
+            bracketMatches[4].t1 = S['K']; bracketMatches[4].t2 = S['L']; // 2K x 2L
+            bracketMatches[5].t1 = P['H']; bracketMatches[5].t2 = S['J']; // 1H x 2J
+            bracketMatches[6].t1 = P['D']; bracketMatches[6].t2 = getT(6);   // 1D x 3os
+            bracketMatches[7].t1 = P['G']; bracketMatches[7].t2 = getT(7);   // 1G x 3os
+
+            // Lado Direito (Top to Bottom): nós 10, 11, 8, 9, 14, 15, 12, 13
+            bracketMatches[10].t1 = P['C']; bracketMatches[10].t2 = S['F']; // 1C x 2F
+            bracketMatches[11].t1 = S['E']; bracketMatches[11].t2 = S['I']; // 2E x 2I
+            bracketMatches[8].t1 = P['A']; bracketMatches[8].t2 = getT(8);     // 1A x 3os
+            bracketMatches[9].t1 = P['L']; bracketMatches[9].t2 = getT(9);     // 1L x 3os
+            bracketMatches[14].t1 = P['J']; bracketMatches[14].t2 = S['H']; // 1J x 2H
+            bracketMatches[15].t1 = S['D']; bracketMatches[15].t2 = S['G']; // 2D x 2G
+            bracketMatches[12].t1 = P['B']; bracketMatches[12].t2 = getT(12);   // 1B x 3os
+            bracketMatches[13].t1 = P['K']; bracketMatches[13].t2 = getT(13);   // 1K x 3os
 
             renderBracket();
+        }
+
+        function iniciarMataMata() {
+            document.getElementById('tab-btn-matamata').disabled = false;
+            prepararMataMataLogico();
+            document.getElementById('tab-btn-matamata').click();
         }
 
         function setWinner(matchId, teamName) {
@@ -853,19 +1763,33 @@
         }
 
         function renderOuterTeam(teamName, matchId, isRight) {
+            let match = bracketMatches[matchId];
+            let isEliminated = match.winner && match.winner !== teamName;
+            
             let abrv = getAbrv(teamName);
             let flagHTML = getFlagImgHTML(teamName);
             let htmlInner = isRight 
-                ? `<div class="node-circle filled" style="margin:0;">${flagHTML}</div><span class="node-abrv">${abrv}</span>`
-                : `<span class="node-abrv">${abrv}</span><div class="node-circle filled" style="margin:0;">${flagHTML}</div>`;
-            return `<div class="node-outer" onclick="setWinner(${matchId}, '${teamName}')">${htmlInner}</div>`;
+                ? `<div class="node-circle filled ${isEliminated ? 'eliminated' : ''}" style="margin:0;">${flagHTML}</div><span class="node-abrv">${abrv}</span>`
+                : `<span class="node-abrv">${abrv}</span><div class="node-circle filled ${isEliminated ? 'eliminated' : ''}" style="margin:0;">${flagHTML}</div>`;
+            return `<div class="node-outer ${isEliminated ? 'eliminated' : ''}" onclick="setWinner(${matchId}, '${teamName}')">${htmlInner}</div>`;
         }
 
         function renderCircleNode(matchId, hideLine = false) {
             let match = bracketMatches[matchId];
             let team = match.winner;
+            let nextMatchId = match.nextMatch;
+            let isEliminated = false;
+            
+            if (team && nextMatchId !== null) {
+                let nextMatch = bracketMatches[nextMatchId];
+                if (nextMatch.winner && nextMatch.winner !== team) {
+                    isEliminated = true;
+                }
+            }
+
             let htmlInterno = team ? getFlagImgHTML(team) : "";
             let filledClass = team ? "filled" : "empty-circle";
+            if (isEliminated) filledClass += " eliminated";
             let onclick = (team && match.nextMatch !== null) ? `onclick="setWinner(${match.nextMatch}, '${team}')"` : "";
             return `<div class="node-circle ${filledClass} ${hideLine ? "hide-line" : ""}" ${onclick}>${htmlInterno}</div>`;
         }
@@ -1028,6 +1952,624 @@
                 document.getElementById('tab-grupos').classList.remove('show', 'active');
                 mudarRodadaGeral(3); 
             });
+        }
+        // ==========================================
+        // 6. MODO AO VIVO E DASHBOARD NOVO
+        // ==========================================
+        
+        let liveRankingData = [];
+        let liveTotalPremio = 0;
+
+        async function atualizarDashboardAovivo() {
+            if(!supabaseClient) return;
+            
+            try {
+                // 1. Fetch Users, Jogos and Palpites
+                const { data: dbJogosRealizados } = await supabaseClient.from('jogos').select('*').not('gols_mandante', 'is', null);
+                const todosPalpites = await fetchAllSupabase('palpites_jogos', '*, usuarios(nome)');
+                const todasClassificacoes = await fetchAllSupabase('palpites_classificacao', '*');
+                
+                // Get unique users who made predictions to calculate prize pool
+                let uniqueUsers = new Set();
+                if(todosPalpites) todosPalpites.forEach(p => uniqueUsers.add(p.usuario_id));
+                let totalUsers = uniqueUsers.size || 0;
+                liveTotalPremio = totalUsers * 30;
+                
+                document.getElementById('dash-premio-1').innerText = "R$ " + (liveTotalPremio * 0.60).toFixed(2);
+                document.getElementById('dash-premio-2').innerText = "R$ " + (liveTotalPremio * 0.25).toFixed(2);
+                document.getElementById('dash-premio-3').innerText = "R$ " + (liveTotalPremio * 0.15).toFixed(2);
+                
+                let scoresMap = {};
+                // Inicializa utilizadores
+                Array.from(uniqueUsers).forEach(uid => {
+                    let nome = todosPalpites?.find(p => p.usuario_id === uid)?.usuarios?.nome || 'User';
+                    scoresMap[uid] = { nome: nome, pts: 0, uid: uid };
+                });
+
+                // --- 1. PONTUAÇÃO DOS JOGOS ---
+                if(todosPalpites && dbJogosRealizados) {
+                    todosPalpites.forEach(p => {
+                        let uid = p.usuario_id;
+                        if(!scoresMap[uid]) return;
+                        
+                        let jogoReal = dbJogosRealizados.find(j => j.id === p.jogo_id);
+                        if(jogoReal) {
+                            let gm = parseInt(p.gols_mandante), gv = parseInt(p.gols_visitante);
+                            let rm = parseInt(jogoReal.gols_mandante), rv = parseInt(jogoReal.gols_visitante);
+                            
+                            if (gm === rm && gv === rv) {
+                                scoresMap[uid].pts += 20; // 10 (acertou resultado) + 10 (placar exato bônus)
+                            } else {
+                                let pDiff = gm - gv, rDiff = rm - rv;
+                                if ((pDiff > 0 && rDiff > 0) || (pDiff < 0 && rDiff < 0) || (pDiff === 0 && rDiff === 0)) {
+                                    scoresMap[uid].pts += 10; // 10 (apenas acertou vencedor/empate)
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // --- 2. CONSTRUIR CLASSIFICAÇÃO REAL E FASES REAIS ---
+                let realClassificacaoGrupos = {};
+                let realFasesMap = {};
+                let tempStats = {};
+                Object.keys(gruposData).forEach(letra => {
+                    gruposData[letra].forEach(t => { 
+                        tempStats[t] = { pts: 0, j: 0, sg: 0, gp: 0, gc: 0, nome: t, grupo: letra }; 
+                        realFasesMap[getAbrv(t)] = 'Fase de Grupos'; // Default
+                    });
+                });
+
+                const faseRank = {
+                    'Fase de Grupos': 0, '16-Avos': 1, 'Oitavas de Final': 2, 
+                    'Quartas de Final': 3, 'Semifinalista': 4, 'Finalista': 5, 'Campeão': 6
+                };
+
+                const updateFase = (t, novaFase) => {
+                    if(t && !t.match(/^[0-9]/)) {
+                        let curRank = faseRank[realFasesMap[t]] || 0;
+                        let newRank = faseRank[novaFase] || 0;
+                        if(newRank > curRank) realFasesMap[t] = novaFase;
+                    }
+                };
+
+                if (dbJogosRealizados) {
+                    Object.keys(jogosData).forEach(letra => {
+                        [1, 2, 3].forEach(r => {
+                            jogosData[letra][r].forEach((jogo, idx) => {
+                                let mId = getAbrv(jogo.mandante), vId = getAbrv(jogo.visitante);
+                                let jReal = dbJogosRealizados.find(j => j.mandante_id === mId && j.visitante_id === vId && ['1','2','3','Fase de Grupos'].includes(j.fase));
+                                if(jReal) {
+                                    let gM = parseInt(jReal.gols_mandante), gV = parseInt(jReal.gols_visitante);
+                                    tempStats[jogo.mandante].j += 1; tempStats[jogo.visitante].j += 1;
+                                    tempStats[jogo.mandante].gp += gM; tempStats[jogo.mandante].gc += gV;
+                                    tempStats[jogo.visitante].gp += gV; tempStats[jogo.visitante].gc += gM;
+                                    tempStats[jogo.mandante].sg += (gM - gV); tempStats[jogo.visitante].sg += (gV - gM);
+                                    if(gM > gV) tempStats[jogo.mandante].pts += 3;
+                                    else if(gV > gM) tempStats[jogo.visitante].pts += 3;
+                                    else { tempStats[jogo.mandante].pts += 1; tempStats[jogo.visitante].pts += 1; }
+                                }
+                            });
+                        });
+                        
+                        let arr = Object.values(tempStats).filter(t => t.grupo === letra);
+                        arr.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+                        realClassificacaoGrupos[letra] = arr;
+                    });
+
+                    // Fases do Mata-Mata deduzidas pela tabela Jogos
+                    dbJogosRealizados.forEach(j => {
+                        let f = j.fase, m = j.mandante_id, v = j.visitante_id;
+                        const faseMapToAlcancada = {
+                            '16-Avos': '16-Avos',
+                            'Oitavas de Final': 'Oitavas de Final',
+                            'Quartas de Final': 'Quartas de Final',
+                            'Semifinal': 'Semifinalista',
+                            'Final': 'Finalista'
+                        };
+
+                        if (faseMapToAlcancada[f]) {
+                            updateFase(m, faseMapToAlcancada[f]);
+                            updateFase(v, faseMapToAlcancada[f]);
+                        }
+                        
+                        // Dedução de vitórias no mata-mata
+                        let gm = parseInt(j.gols_mandante), gv = parseInt(j.gols_visitante);
+                        if (gm !== gv && !isNaN(gm) && !isNaN(gv)) { 
+                            let winner = gm > gv ? m : v;
+                            if (f === '16-Avos') updateFase(winner, 'Oitavas de Final');
+                            if (f === 'Oitavas de Final') updateFase(winner, 'Quartas de Final');
+                            if (f === 'Quartas de Final') updateFase(winner, 'Semifinalista');
+                            if (f === 'Semifinal') updateFase(winner, 'Finalista');
+                            if (f === 'Final') updateFase(winner, 'Campeão');
+                        }
+                    });
+                }
+
+                // --- 3. PONTUAÇÃO DE GRUPOS E MATA-MATA ---
+                if (todasClassificacoes) {
+                    todasClassificacoes.forEach(p => {
+                        let uid = p.usuario_id;
+                        if(!scoresMap[uid]) return;
+                        
+                        let team = p.selecao_id;
+                        let userPos = p.posicao_grupo;
+                        let userFase = p.fase_maxima_alcancada;
+                        
+                        let realFase = realFasesMap[team] || 'Fase de Grupos';
+                        let rRank = faseRank[realFase] || 0;
+                        let uRank = faseRank[userFase] || 0;
+                        
+                        // Grupos
+                        if (rRank >= 1 && uRank >= 1) {
+                            scoresMap[uid].pts += 10; // Acertou quem avança
+                            
+                            // Cravar a posição
+                            let realPos = 0;
+                            for (let l of Object.keys(realClassificacaoGrupos)) {
+                                let idx = realClassificacaoGrupos[l].findIndex(t => getAbrv(t.nome) === team);
+                                if (idx !== -1) { realPos = idx + 1; break; }
+                            }
+                            if (realPos === userPos) {
+                                scoresMap[uid].pts += 10; // Cravar posição (+10 bonus)
+                            }
+                        }
+                        
+                        // Mata-Mata
+                        if (rRank >= 2 && uRank >= 2) scoresMap[uid].pts += 30; // Oitavas
+                        if (rRank >= 3 && uRank >= 3) scoresMap[uid].pts += 40; // Quartas
+                        if (rRank >= 4 && uRank >= 4) scoresMap[uid].pts += 50; // Semis
+                        if (rRank >= 5 && uRank >= 5) scoresMap[uid].pts += 70; // Final
+                        if (rRank >= 6 && uRank >= 6) scoresMap[uid].pts += 100; // Campeão
+                    });
+                }
+                
+                liveRankingData = Object.values(scoresMap).sort((a,b) => b.pts - a.pts);
+                
+                // -- RENDERIZAR CAROUSEL DE GRUPOS --
+                let carInner = document.getElementById('dash-grupos-inner');
+                if(carInner) {
+                    let cHtml = '';
+                    let keys = Object.keys(realClassificacaoGrupos).sort();
+                    for(let k=0; k<keys.length; k+=2) {
+                        let active = k === 0 ? 'active' : '';
+                        
+                        let buildCard = (letra) => {
+                            let arr = realClassificacaoGrupos[letra];
+                            let trs = arr.map((t, i) => `<tr><td class="fw-bold">${i+1}º</td><td class="text-start">${getFlagImgHTML(getAbrv(t.nome), true)} ${t.nome}</td><td class="fw-bold">${t.j}</td><td class="fw-bold text-success">${t.pts}</td><td>${t.sg}</td><td>${t.gp}</td><td>${t.gc}</td></tr>`).join('');
+                            return `<div class="col-md-6 mb-3">
+                                <div class="card border-0 shadow-sm rounded-4 mx-auto" style="max-width: 500px;">
+                                    <div class="card-header bg-dark text-white fw-bold text-center" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">Grupo ${letra}</div>
+                                    <table class="table table-sm text-center mb-0 align-middle" style="font-size: 0.9rem;">
+                                        <thead class="table-light"><tr><th>#</th><th class="text-start">Seleção</th><th>J</th><th>P</th><th>SG</th><th>GP</th><th>GC</th></tr></thead>
+                                        <tbody>${trs}</tbody>
+                                    </table>
+                                </div>
+                            </div>`;
+                        };
+                        
+                        let l1 = keys[k];
+                        let l2 = k+1 < keys.length ? keys[k+1] : null;
+                        
+                        let htmlCards = `<div class="row w-100 mx-auto justify-content-center px-lg-4">`;
+                        htmlCards += buildCard(l1);
+                        if(l2) htmlCards += buildCard(l2);
+                        htmlCards += `</div>`;
+                        
+                        cHtml += `<div class="carousel-item ${active}">${htmlCards}</div>`;
+                    }
+                    if(cHtml !== '') carInner.innerHTML = cHtml;
+                    else carInner.innerHTML = '<div class="carousel-item active"><div class="text-center py-4 text-muted">Grupos indisponíveis.</div></div>';
+                }
+
+                // Atualizar UI do Dashboard
+                let myIdx = liveRankingData.findIndex(r => r.uid === usuarioLogado.id);
+                if(myIdx !== -1) {
+                    document.getElementById('dash-my-score').innerHTML = `${liveRankingData[myIdx].pts} <span class="fs-4 opacity-75">pts</span>`;
+                    document.getElementById('dash-my-pos').innerText = `${myIdx + 1}º`;
+                } else {
+                    document.getElementById('dash-my-score').innerHTML = `0 <span class="fs-4 opacity-75">pts</span>`;
+                    document.getElementById('dash-my-pos').innerText = `--`;
+                }
+                
+                let tbody = document.getElementById('dash-ranking-top5');
+                tbody.innerHTML = '';
+                liveRankingData.slice(0, 5).forEach((r, idx) => {
+                    let medalha = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : idx+1+'º'));
+                    tbody.innerHTML += `<tr>
+                        <td class="fw-bold fs-5" style="width: 50px;">${medalha}</td>
+                        <td class="text-start fw-bold" style="color: #4A00E0;">${r.nome}</td>
+                        <td class="fw-bold text-end pe-3">${r.pts} pts</td>
+                    </tr>`;
+                });
+                if(liveRankingData.length === 0) tbody.innerHTML = '<tr><td class="text-muted py-3">Ainda sem pontos calculados.</td></tr>';
+                
+                // Jogos de Hoje
+                let today = new Date();
+                let dateStrStart = today.toISOString().split('T')[0];
+                let tomorrow = new Date(today.getTime() + 86400000);
+                let dateStrEnd = tomorrow.toISOString().split('T')[0];
+                
+                const { data: dbJogosHoje } = await supabaseClient
+                    .from('jogos')
+                    .select('*')
+                    .gte('data_jogo', dateStrStart)
+                    .lt('data_jogo', dateStrEnd)
+                    .order('data_jogo', { ascending: true });
+                    
+                let dashJogos = document.getElementById('dash-jogos-hoje');
+                dashJogos.innerHTML = '<div class="text-center py-4 text-muted">⏳ A sincronizar com API Ao Vivo...</div>';
+
+                // Fetch ESPN Live Data
+                let espnData = null;
+                try {
+                    const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
+                    espnData = await res.json();
+                } catch(e) { console.error('Erro na API ESPN:', e); }
+
+                dashJogos.innerHTML = '';
+                if(dbJogosHoje && dbJogosHoje.length > 0) {
+                    // Prevenir múltiplas chamadas de update em paralelo
+                    let promessasUpdate = [];
+
+                    dbJogosHoje.forEach(j => {
+                        let mNome = getFullTeamName(j.mandante_id);
+                        let vNome = getFullTeamName(j.visitante_id);
+                        let gm = j.gols_mandante;
+                        let gv = j.gols_visitante;
+                        let liveStatusText = '';
+                        let marcadores = '';
+
+                        if (espnData && espnData.events) {
+                            let espnEvent = espnData.events.find(e => {
+                                let home = e.competitions[0].competitors.find(c => c.homeAway === 'home');
+                                let away = e.competitions[0].competitors.find(c => c.homeAway === 'away');
+                                if(!home || !away) return false;
+                                
+                                let matchM = home.team.displayName.toLowerCase().includes(mNome.split(' ')[0].toLowerCase()) || home.team.abbreviation === j.mandante_id || (j.mandante_id === 'AFS' && home.team.abbreviation === 'RSA') || (j.mandante_id === 'CZE' && home.team.abbreviation === 'CZE');
+                                let matchV = away.team.displayName.toLowerCase().includes(vNome.split(' ')[0].toLowerCase()) || away.team.abbreviation === j.visitante_id || (j.visitante_id === 'AFS' && away.team.abbreviation === 'RSA') || (j.visitante_id === 'CZE' && away.team.abbreviation === 'CZE');
+                                
+                                return matchM || matchV;
+                            });
+
+                            if (espnEvent) {
+                                let comp = espnEvent.competitions[0];
+                                let home = comp.competitors.find(c => c.homeAway === 'home');
+                                let away = comp.competitors.find(c => c.homeAway === 'away');
+                                let state = espnEvent.status.type.state; 
+                                
+                                if (state === 'in') {
+                                    liveStatusText = `<span class="badge bg-danger animate__animated animate__pulse animate__infinite px-2 py-1">${espnEvent.status.displayClock} Ao Vivo</span>`;
+                                    gm = home.score;
+                                    gv = away.score;
+                                } else if (state === 'post') {
+                                    liveStatusText = `<span class="badge bg-secondary px-2 py-1">Terminado</span>`;
+                                    gm = home.score;
+                                    gv = away.score;
+                                    
+                                    // Auto Update Supabase (Apenas o Admin João Vilaça)
+                                    if (j.gols_mandante === null && usuarioLogado && usuarioLogado.id === '65ca82e9-b932-409e-ab11-61137861dea1') {
+                                        let p = supabaseClient.from('jogos').update({ gols_mandante: gm, gols_visitante: gv }).eq('id', j.id);
+                                        promessasUpdate.push(p);
+                                    }
+                                } else {
+                                    let horaLocal = new Date(espnEvent.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                    liveStatusText = `<span class="badge bg-light text-dark border px-2 py-1">Hoje ${horaLocal}</span>`;
+                                }
+
+                                // Marcadores de Gols
+                                if (comp.details && comp.details.length > 0) {
+                                    let mScorers = [];
+                                    let vScorers = [];
+                                    comp.details.forEach(d => {
+                                        if((d.type && d.type.text.toLowerCase().includes('goal')) || d.scoringPlay) {
+                                            let player = d.athletesInvolved && d.athletesInvolved[0] ? d.athletesInvolved[0].shortName || d.athletesInvolved[0].displayName.split(' ').pop() : 'OG';
+                                            let time = d.clock ? d.clock.displayValue : '';
+                                            if (d.team.id === home.team.id) mScorers.push(`${player} ${time}`);
+                                            else vScorers.push(`${player} ${time}`);
+                                        }
+                                    });
+                                    if(mScorers.length > 0 || vScorers.length > 0) {
+                                        marcadores = `
+                                        <div class="d-flex justify-content-between px-2 text-muted mt-2" style="font-size: 0.75rem;">
+                                            <div class="text-end" style="width: 45%;">${mScorers.join(', ')}</div>
+                                            <div class="text-center" style="width: 10%;">⚽</div>
+                                            <div class="text-start" style="width: 45%;">${vScorers.join(', ')}</div>
+                                        </div>`;
+                                    }
+                                }
+                            }
+                        }
+
+                        let dGM = gm !== null ? gm : '-';
+                        let dGV = gv !== null ? gv : '-';
+
+                        dashJogos.innerHTML += `
+                            <div class="mb-3 pb-3 border-bottom position-relative">
+                                <div class="text-center mb-2" style="font-size: 0.8rem;">${liveStatusText}</div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-end" style="width:40%; font-weight:600;">
+                                        <span class="d-none d-md-inline">${mNome}</span> ${getFlagImgHTML(j.mandante_id, true)}
+                                    </div>
+                                    <div class="text-center badge bg-dark fs-5 mx-2 py-2" style="width:20%; box-shadow: inset 0px 2px 4px rgba(0,0,0,0.5);">${dGM} x ${dGV}</div>
+                                    <div class="text-start" style="width:40%; font-weight:600;">
+                                        ${getFlagImgHTML(j.visitante_id, true)} <span class="d-none d-md-inline">${vNome}</span>
+                                    </div>
+                                </div>
+                                ${marcadores}
+                            </div>
+                        `;
+                    });
+
+                    if(promessasUpdate.length > 0) {
+                        await Promise.all(promessasUpdate);
+                        // Se atualizamos jogos na DB, o ranking alterou, então faria sentido chamar recarregar o dashboard,
+                        // mas para evitar loop infinito, apenas deixamos os dados guardados para o próximo F5.
+                    }
+
+                } else {
+                    dashJogos.innerHTML = '<div class="text-center py-4 text-muted">Não há jogos registados para a data de hoje.</div>';
+                }
+
+            } catch (err) { console.error("Erro no dashboard ao vivo", err); }
+        }
+
+        async function carregarTodosOsJogosEPalpites() {
+            let container = document.getElementById('lista-todos-jogos-palpites');
+            container.innerHTML = '<div class="text-center py-5 text-muted">⏳ A carregar os dados...</div>';
+            if(!supabaseClient) return;
+
+            try {
+                const { data: dbJogos } = await supabaseClient.from('jogos').select('*').order('data_jogo', { ascending: true });
+                const todosPalpites = await fetchAllSupabase('palpites_jogos', '*, usuarios(nome)');
+                
+                if(!dbJogos || dbJogos.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5">Nenhum jogo encontrado.</div>';
+                    return;
+                }
+                let getRodada = (j) => {
+                    let m = getFullTeamName(j.mandante_id);
+                    let v = getFullTeamName(j.visitante_id);
+                    for (let l in jogosData) {
+                        for (let r in jogosData[l]) {
+                             if (jogosData[l][r].find(x => (x.mandante === m && x.visitante === v) || (x.mandante === v && x.visitante === m))) return `Rodada ${r}`;
+                        }
+                    }
+                    return j.fase;
+                };
+
+                let jogosPorFase = {};
+                dbJogos.forEach((j) => {
+                    let faseNome = j.fase === 'Fase de Grupos' ? getRodada(j) : j.fase;
+                    if (!jogosPorFase[faseNome]) jogosPorFase[faseNome] = [];
+                    jogosPorFase[faseNome].push(j);
+                });
+                
+                let html = '<div class="accordion" id="accordionJogos">';
+                let idxGlobal = 0;
+
+                let faseOrder = { 'Rodada 1': 1, 'Rodada 2': 2, 'Rodada 3': 3, '16-Avos': 4, 'Oitavas de Final': 5, 'Quartas de Final': 6, 'Semifinal': 7, 'Final': 8 };
+                let sortedFases = Object.keys(jogosPorFase).sort((a,b) => (faseOrder[a]||99) - (faseOrder[b]||99));
+
+                sortedFases.forEach(fase => {
+                    html += `<h5 class="fw-bold mt-4 mb-3 text-primary text-uppercase" style="letter-spacing: 1px;"><i class="bi bi-calendar-event me-2"></i>${fase}</h5>`;
+                    jogosPorFase[fase].forEach((j) => {
+                        let idAcc = 'flush-collapse' + idxGlobal;
+                        let hdAcc = 'flush-heading' + idxGlobal;
+                        idxGlobal++;
+                        
+                        let mNome = getFullTeamName(j.mandante_id);
+                        let vNome = getFullTeamName(j.visitante_id);
+                        let gm = j.gols_mandante !== null ? j.gols_mandante : '-';
+                        let gv = j.gols_visitante !== null ? j.gols_visitante : '-';
+                        
+                        let palpitesHTML = '';
+                        let statsBarHTML = '';
+                        let palpitesDesseJogo = todosPalpites ? todosPalpites.filter(p => p.jogo_id === j.id) : [];
+                        
+                        let countM = 0, countE = 0, countV = 0;
+
+                        if(palpitesDesseJogo.length > 0) {
+                            palpitesHTML = `<table class="table table-sm table-striped mt-3">
+                                <thead><tr><th>Participante</th><th class="text-center">Palpite</th><th class="text-center">Pontos Ganhos</th></tr></thead><tbody>`;
+                        palpitesDesseJogo.forEach(p => {
+                            let pPts = 0;
+                            if (gm !== '-') {
+                                let rm = parseInt(gm), rv = parseInt(gv);
+                                let pm = parseInt(p.gols_mandante), pv = parseInt(p.gols_visitante);
+                                if (pm > pv) countM++;
+                                else if (pv > pm) countV++;
+                                else countE++;
+
+                                if (pm === rm && pv === rv) pPts = 20;
+                                else {
+                                    let pDiff = pm - pv, rDiff = rm - rv;
+                                    if ((pDiff > 0 && rDiff > 0) || (pDiff < 0 && rDiff < 0) || (pDiff === 0 && rDiff === 0)) pPts = 10;
+                                }
+                            } else {
+                                let pm = parseInt(p.gols_mandante), pv = parseInt(p.gols_visitante);
+                                if (pm > pv) countM++;
+                                else if (pv > pm) countV++;
+                                else countE++;
+                            }
+                            let bgClass = pPts === 20 ? 'bg-success text-white' : (pPts === 10 ? 'bg-warning text-dark' : 'bg-light text-muted');
+                            if(gm === '-') bgClass = 'bg-light text-muted';
+                            
+                            palpitesHTML += `<tr>
+                                <td>${p.usuarios?.nome || 'User'}</td>
+                                <td class="text-center fw-bold">${p.gols_mandante} x ${p.gols_visitante}</td>
+                                <td class="text-center"><span class="badge ${bgClass}">${gm === '-' ? '-' : pPts+' pts'}</span></td>
+                            </tr>`;
+                        });
+                        
+                        palpitesHTML += `</tbody></table>`;
+                    } else {
+                        palpitesHTML = `<p class="text-muted mt-3 mb-0">Ninguém palpitou neste jogo.</p>`;
+                    }
+                    
+                    statsBarHTML = '';
+                    let totalP = palpitesDesseJogo.length;
+                    if(totalP > 0) {
+                        let percM = Math.round((countM / totalP) * 100) || 0;
+                        let percE = Math.round((countE / totalP) * 100) || 0;
+                        let percV = Math.round((countV / totalP) * 100) || 0;
+                        
+                        let colorM = getTeamColor(mNome);
+                        let colorV = getTeamColor(vNome);
+
+                        statsBarHTML = `
+                        <div class="w-100 mt-4 mb-2 px-2">
+                            <div class="progress rounded-pill shadow-sm" style="height: 18px; font-size: 0.75rem;">
+                                <div class="progress-bar fw-bold" role="progressbar" style="width: ${percM}%; background-color: ${colorM}; opacity: 0.85;" aria-valuenow="${percM}" aria-valuemin="0" aria-valuemax="100">${percM > 0 ? percM + '%' : ''}</div>
+                                <div class="progress-bar bg-secondary fw-bold" role="progressbar" style="width: ${percE}%; opacity: 0.5;" aria-valuenow="${percE}" aria-valuemin="0" aria-valuemax="100">${percE > 0 ? percE + '%' : ''}</div>
+                                <div class="progress-bar fw-bold" role="progressbar" style="width: ${percV}%; background-color: ${colorV}; opacity: 0.85;" aria-valuenow="${percV}" aria-valuemin="0" aria-valuemax="100">${percV > 0 ? percV + '%' : ''}</div>
+                            </div>
+                            <div class="d-flex text-center small fw-bold mt-1" style="font-size: 0.7rem;">
+                                <div style="width: ${percM}%; color: ${colorM}; overflow: hidden; text-overflow: ellipsis;">${percM > 0 ? getAbrv(mNome) : ''}</div>
+                                <div style="width: ${percE}%; color: #6c757d; overflow: hidden; text-overflow: ellipsis;">${percE > 0 ? 'EMP' : ''}</div>
+                                <div style="width: ${percV}%; color: ${colorV}; overflow: hidden; text-overflow: ellipsis;">${percV > 0 ? getAbrv(vNome) : ''}</div>
+                            </div>
+                        </div>`;
+                    }
+                    
+                    let isHoje = j.data_jogo && j.data_jogo.startsWith(new Date().toISOString().split('T')[0]);
+                    let borderClass = isHoje ? 'border border-primary border-2' : 'border-0 border-bottom';
+                    
+                    html += `
+                        <div class="accordion-item mb-3 shadow-sm rounded-4 overflow-hidden ${borderClass}">
+                            <h2 class="accordion-header" id="${hdAcc}">
+                                <button class="accordion-button collapsed bg-white fw-bold py-3" type="button" data-bs-toggle="collapse" data-bs-target="#${idAcc}" aria-expanded="false" aria-controls="${idAcc}">
+                                    <div class="w-100 d-flex flex-column me-3">
+                                        <div class="w-100 d-flex justify-content-between align-items-center mb-1">
+                                            <div class="text-end text-truncate" style="width:38%;">${mNome} ${getFlagImgHTML(j.mandante_id, true)}</div>
+                                            <div class="text-center badge bg-dark fs-6 mx-1" style="min-width:65px;">${gm} x ${gv}</div>
+                                            <div class="text-start text-truncate" style="width:38%;">${getFlagImgHTML(j.visitante_id, true)} ${vNome}</div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </h2>
+                            <div id="${idAcc}" class="accordion-collapse collapse" aria-labelledby="${hdAcc}" data-bs-parent="#accordionJogos">
+                                <div class="accordion-body bg-light pt-0">
+                                    ${palpitesHTML}
+                                    ${statsBarHTML}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                });
+                html += '</div>';
+                container.innerHTML = html;
+
+            } catch(e) { console.error(e); container.innerHTML = '<p class="text-danger">Erro ao carregar dados.</p>'; }
+        }
+
+        async function carregarListaDeUsuariosParaBracket() {
+            let select = document.getElementById('select-bracket-user');
+            if(select.options.length > 1) return; // Ja carregado
+            if(!supabaseClient) return;
+            try {
+                const data = await fetchAllSupabase('palpites_classificacao', 'usuario_id, usuarios(nome)');
+                let mapUnicos = {};
+                if(data) data.forEach(d => { if(d.usuarios) mapUnicos[d.usuario_id] = d.usuarios.nome; });
+                
+                Object.keys(mapUnicos).forEach(uid => {
+                    let opt = document.createElement('option');
+                    opt.value = uid; opt.innerText = mapUnicos[uid];
+                    select.appendChild(opt);
+                });
+            } catch(e) { console.error(e); }
+        }
+
+        async function renderizarBracketAlheio(userId) {
+            let container = document.getElementById('bracket-alheio-container');
+            if(!userId) { container.style.display = 'none'; return; }
+            container.style.display = 'block';
+            container.innerHTML = '<h5 class="text-center py-5 text-muted">A construir chaveamento...</h5>';
+            
+            try {
+                const { data: dbJogosUser } = await supabaseClient.from('palpites_jogos').select('jogo_id, gols_mandante, gols_visitante').eq('usuario_id', userId);
+                const { data: dbClassUser } = await supabaseClient.from('palpites_classificacao').select('selecao_id, fase_maxima_alcancada').eq('usuario_id', userId);
+                
+                if(!dbClassUser || dbClassUser.length === 0) {
+                    container.innerHTML = '<h5 class="text-center py-5 text-danger">O utilizador não completou o Bolão.</h5>';
+                    return;
+                }
+                
+                let originalWrapper = document.getElementById('bracket-container');
+                let newWrapper = container;
+                originalWrapper.id = 'bracket-container-hidden';
+                newWrapper.id = 'bracket-container';
+                
+                let bkpClassificacaoFinalGrupos = JSON.parse(JSON.stringify(classificacaoFinalGrupos));
+                let bkpBracketMatches = JSON.parse(JSON.stringify(bracketMatches));
+                
+                const { data: dbJogos } = await supabaseClient.from('jogos').select('id, mandante_id, visitante_id');
+                let mapJogosToAbrv = {};
+                if(dbJogos) dbJogos.forEach(j => { mapJogosToAbrv[j.id] = { m: j.mandante_id, v: j.visitante_id }; });
+                
+                let tempStats = {};
+                Object.keys(gruposData).forEach(letra => {
+                    gruposData[letra].forEach(t => { tempStats[t] = { pts: 0, sg: 0, gp: 0, gc: 0, nome: t, grupo: letra }; });
+                });
+                
+                Object.keys(jogosData).forEach(letra => {
+                    [1, 2, 3].forEach(r => {
+                        jogosData[letra][r].forEach((jogo, idx) => {
+                            let mId = getAbrv(jogo.mandante);
+                            let vId = getAbrv(jogo.visitante);
+                            let idReal = Object.keys(mapJogosToAbrv).find(key => mapJogosToAbrv[key].m === mId && mapJogosToAbrv[key].v === vId);
+                            if(idReal) {
+                                let p = dbJogosUser.find(x => x.jogo_id == idReal);
+                                if(p && p.gols_mandante !== null && p.gols_visitante !== null) {
+                                    let gM = parseInt(p.gols_mandante), gV = parseInt(p.gols_visitante);
+                                    tempStats[jogo.mandante].gp += gM; tempStats[jogo.mandante].gc += gV;
+                                    tempStats[jogo.visitante].gp += gV; tempStats[jogo.visitante].gc += gM;
+                                    tempStats[jogo.mandante].sg += (gM - gV); tempStats[jogo.visitante].sg += (gV - gM);
+                                    if(gM > gV) tempStats[jogo.mandante].pts += 3;
+                                    else if(gV > gM) tempStats[jogo.visitante].pts += 3;
+                                    else { tempStats[jogo.mandante].pts += 1; tempStats[jogo.visitante].pts += 1; }
+                                }
+                            }
+                        });
+                    });
+                    
+                    let arr = Object.values(tempStats).filter(t => t.grupo === letra);
+                    arr.sort((a, b) => b.pts - a.pts || b.sg - a.sg || b.gp - a.gp);
+                    classificacaoFinalGrupos[letra] = arr;
+                });
+                
+                prepararMataMataLogico();
+                
+                let dictFases = {};
+                dbClassUser.forEach(p => { dictFases[p.selecao_id] = p.fase_maxima_alcancada; });
+                
+                let fasesAceites = {
+                    'Oitavas de Final': ['Oitavas de Final', 'Quartas de Final', 'Semifinalista', 'Finalista', 'Campeão'],
+                    'Quartas de Final': ['Quartas de Final', 'Semifinalista', 'Finalista', 'Campeão'],
+                    'Semifinalista': ['Semifinalista', 'Finalista', 'Campeão'],
+                    'Finalista': ['Finalista', 'Campeão'],
+                    'Campeão': ['Campeão']
+                };
+                for(let k=0; k<5; k++) {
+                    for (let i = 0; i <= 30; i++) {
+                        let match = bracketMatches[i];
+                        let req = i <= 15 ? 'Oitavas de Final' : (i <= 23 ? 'Quartas de Final' : (i <= 27 ? 'Semifinalista' : (i <= 29 ? 'Finalista' : 'Campeão')));
+                        if (match.t1 && match.t2 && !match.winner) {
+                            let f1 = dictFases[getAbrv(match.t1)];
+                            let f2 = dictFases[getAbrv(match.t2)];
+                            if (f1 && fasesAceites[req].includes(f1)) setWinner(i, match.t1);
+                            else if (f2 && fasesAceites[req].includes(f2)) setWinner(i, match.t2);
+                        }
+                    }
+                }
+                
+                newWrapper.id = 'bracket-alheio-container';
+                originalWrapper.id = 'bracket-container';
+                classificacaoFinalGrupos = bkpClassificacaoFinalGrupos;
+                bracketMatches = bkpBracketMatches;
+                
+            } catch(e) { console.error(e); container.innerHTML = '<p class="text-danger">Erro ao reconstruir bracket.</p>'; }
         }
     </script>
 </body>
